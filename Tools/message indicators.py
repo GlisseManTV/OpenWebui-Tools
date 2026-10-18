@@ -1,10 +1,10 @@
 """
 title: Message Loading Indicator
 description: Adds Message Loading Indicator and Thinking Indicator settings under Settings > Interface, so each user picks how a reply shows it is loading (Open WebUI's default, blinking cursor, pulsing dot, legacy bars, terminal block, typing dots, equalizer, spinner, shimmer lines, ellipsis, scanner, orbit, ripple, breathing orb, dot grid, flipping square, sparkle, heartbeat or bouncing ball) and which icon sits beside the Thinking header while a model reasons. Published into /static/loader.js through the Shared Assets Protocol, so it coexists with Theme Designer Pro and any other plugin using it.
-author: ichrist (based on G30 function)
+author: ichrist (adapted from G30 function)
 author_url: https://openwebui.com/u/ichrist
 funding_url:
-version: 1.3.3
+version: 1.4.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -454,7 +454,6 @@ NEW_STYLES = [
     "ball",
 ]
 
-
 # ---------------------------------------------------------------------------
 # 1.3.0: 30 more styles. Merged into the dicts above so the generated CSS,
 # both pickers and the valves pick them up automatically.
@@ -464,50 +463,104 @@ def _s(n):
 
 
 MORE_STYLE_NAMES = {
-    "dualring": "Dual Ring",
-    "chase": "Dot Chase",
-    "dna": "DNA Helix",
-    "pendulum": "Pendulum",
-    "cradle": "Newton's Cradle",
-    "progress": "Progress Bar",
-    "stripes": "Barber Pole",
-    "hourglass": "Hourglass",
-    "clock": "Clock",
-    "radar": "Radar",
-    "pulsering": "Pulse Ring",
-    "squares": "Fading Squares",
-    "diamond": "Morphing Diamond",
-    "sine": "Sine Wave",
-    "dotwave": "Dot Wave",
-    "chart": "Bar Chart",
-    "typewriter": "Typewriter",
-    "underscore": "Underscore",
-    "lines": "Rolling Lines",
-    "pacman": "Chomper",
-    "infinity": "Infinity",
-    "triangle": "Triangle Trace",
-    "morph": "Morphing Blob",
-    "dotring": "Dot Ring",
-    "bubbles": "Rising Bubbles",
-    "stairs": "Stairs",
-    "wifi": "Signal",
-    "bolt": "Lightning",
-    "twinkle": "Twinkle",
-    "gradient": "Gradient Ring",
+    "dualring": "Dual Ring", "chase": "Dot Chase", "dna": "DNA Helix",
+    "pendulum": "Pendulum", "cradle": "Newton's Cradle", "progress": "Progress Bar",
+    "stripes": "Barber Pole", "hourglass": "Hourglass", "clock": "Clock",
+    "radar": "Radar", "pulsering": "Pulse Ring", "squares": "Fading Squares",
+    "diamond": "Morphing Diamond", "sine": "Sine Wave", "dotwave": "Dot Wave",
+    "chart": "Bar Chart", "typewriter": "Typewriter", "underscore": "Underscore",
+    "lines": "Rolling Lines", "pacman": "Chomper", "infinity": "Infinity",
+    "triangle": "Triangle Trace", "morph": "Morphing Blob", "dotring": "Dot Ring",
+    "bubbles": "Rising Bubbles", "stairs": "Stairs", "wifi": "Signal",
+    "bolt": "Lightning", "twinkle": "Twinkle", "gradient": "Gradient Ring",
 }
+# ---- 1.4.0: 40 more styles (merged into MORE_STYLE_NAMES below) ----
+EXTRA_STYLE_NAMES = {
+    "spiral": "Spiral", "target": "Target", "squarejump": "Jumping Squares",
+    "seesaw": "Seesaw", "propeller": "Propeller", "cog": "Cog",
+    "dotted": "Dotted Circle", "ios": "iOS Spinner", "comet": "Comet",
+    "marquee": "Marquee", "flame": "Flame", "drop": "Water Drop",
+    "rain": "Rain", "fill": "Fill Up", "battery": "Battery",
+    "moon": "Moon Phase", "sun": "Sun", "heart": "Heart Beat",
+    "star": "Star Pulse", "spectrum": "Spectrum", "bars3": "Triple Bars",
+    "swap": "Swap Dots", "trio": "Trio Orbit", "satellite": "Satellite",
+    "atom": "Atom", "binary": "Binary", "segments": "Segmented Bar",
+    "zigzag": "Zigzag", "squaretrace": "Square Trace", "hexagon": "Hexagon Trace",
+    "pingpong": "Ping Pong", "traffic": "Traffic Light", "search": "Search",
+    "matrix": "Dot Matrix", "rotsq": "Turning Square", "quad": "Quad Spin",
+    "knight": "Knight Rider", "thought": "Thought Bubble", "diamonds": "Diamond Chain",
+    "snow": "Snowfall",
+}
+MORE_STYLE_NAMES.update(EXTRA_STYLE_NAMES)
+EXTRA_WIDE = {"segments", "pingpong", "knight"}
+EXTRA_DISPLAY = {k: "inline-flex" for k in (
+    "squarejump", "rain", "spectrum", "bars3", "binary", "segments",
+    "traffic", "thought", "diamonds", "snow")}
+EXTRA_DISPLAY.update({"matrix": "inline-grid", "quad": "inline-grid"})
+
+_TRACE = 'd="{d}"'
+
+
+def _trace(cls, vb, d):
+    return (f'<span class="osk-{cls}"><svg viewBox="{vb}" aria-hidden="true">'
+            f'<path class="t" d="{d}"/><path class="a" pathLength="100" d="{d}"/></svg></span>')
+
+
+EXTRA_MARKUP = "".join([
+    f'<span class="osk-spiral">{_s(8)}</span>',
+    '<span class="osk-target"></span>',
+    f'<span class="osk-squarejump">{_s(3)}</span>',
+    '<span class="osk-seesaw"></span>',
+    '<span class="osk-propeller"></span>',
+    '<span class="osk-cog"></span>',
+    '<span class="osk-dotted"></span>',
+    f'<span class="osk-ios">{_s(12)}</span>',
+    f'<span class="osk-comet">{_s(6)}</span>',
+    '<span class="osk-marquee"></span>',
+    '<span class="osk-flame"></span>',
+    '<span class="osk-drop"></span>',
+    f'<span class="osk-rain">{_s(5)}</span>',
+    '<span class="osk-fill"></span>',
+    '<span class="osk-battery"><span></span></span>',
+    '<span class="osk-moon"></span>',
+    f'<span class="osk-sun">{_s(8)}</span>',
+    '<span class="osk-heart"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg></span>',
+    '<span class="osk-star"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7.1L12 17.6 5.7 21.3l1.7-7.1L2 9.5l7.1-.6z"/></svg></span>',
+    f'<span class="osk-spectrum">{_s(7)}</span>',
+    f'<span class="osk-bars3">{_s(3)}</span>',
+    f'<span class="osk-swap">{_s(2)}</span>',
+    f'<span class="osk-trio">{_s(3)}</span>',
+    '<span class="osk-satellite"><span></span></span>',
+    f'<span class="osk-atom">{_s(3)}</span>',
+    f'<span class="osk-binary">{_s(5)}</span>',
+    f'<span class="osk-segments">{_s(6)}</span>',
+    '<span class="osk-zigzag"><svg viewBox="0 0 24 12" aria-hidden="true"><path pathLength="50" d="M0 10L4 2L8 10L12 2L16 10L20 2L24 10"/></svg></span>',
+    _trace("squaretrace", "0 0 16 16", "M2.5 2.5H13.5V13.5H2.5Z"),
+    _trace("hexagon", "0 0 16 16", "M8 1.5L14 5V11L8 14.5L2 11V5Z"),
+    '<span class="osk-pingpong"><span></span></span>',
+    f'<span class="osk-traffic">{_s(3)}</span>',
+    '<span class="osk-search"></span>',
+    f'<span class="osk-matrix">{_s(16)}</span>',
+    '<span class="osk-rotsq"></span>',
+    f'<span class="osk-quad">{_s(4)}</span>',
+    '<span class="osk-knight"></span>',
+    f'<span class="osk-thought">{_s(3)}</span>',
+    f'<span class="osk-diamonds">{_s(3)}</span>',
+    f'<span class="osk-snow">{_s(4)}</span>',
+])
+
 # Too wide for the small Thinking header icon.
-_WIDE = {"progress", "stripes", "pacman", "typewriter"}
+_WIDE = {"progress", "stripes", "pacman", "typewriter"} | EXTRA_WIDE
 MORE_DISPLAY = {k: "inline-block" for k in MORE_STYLE_NAMES}
 for _k in ("dna", "dotwave", "chart", "lines", "stairs", "cradle"):
     MORE_DISPLAY[_k] = "inline-flex"
 MORE_DISPLAY["squares"] = "inline-grid"
+MORE_DISPLAY.update(EXTRA_DISPLAY)
 
 
 def _sorted_names(d, first):
     head = {k: d[k] for k in first if k in d}
-    rest = sorted(
-        ((k, v) for k, v in d.items() if k not in head), key=lambda kv: kv[1].lower()
-    )
+    rest = sorted(((k, v) for k, v in d.items() if k not in head), key=lambda kv: kv[1].lower())
     return {**head, **dict(rest)}
 
 
@@ -520,40 +573,39 @@ THINK_NAMES = _sorted_names(THINK_NAMES, ("default", "none"))
 STYLE_LITERAL = Literal[tuple(STYLE_NAMES)]
 THINK_LITERAL = Literal[tuple(THINK_NAMES)]
 
-MORE_MARKUP = "".join(
-    [
-        '<span class="osk-dualring"></span>',
-        f'<span class="osk-chase">{_s(8)}</span>',
-        f'<span class="osk-dna">{_s(5)}</span>',
-        '<span class="osk-pendulum"><span></span></span>',
-        f'<span class="osk-cradle">{_s(5)}</span>',
-        '<span class="osk-progress"><span></span></span>',
-        '<span class="osk-stripes"></span>',
-        '<span class="osk-hourglass"><svg viewBox="0 0 12 16" aria-hidden="true"><path d="M1 1h10M1 15h10M2 1c0 5 4 5 4 7s-4 2-4 7M10 1c0 5-4 5-4 7s4 2 4 7"/></svg></span>',
-        '<span class="osk-clock"></span>',
-        '<span class="osk-radar"></span>',
-        '<span class="osk-pulsering"></span>',
-        f'<span class="osk-squares">{_s(4)}</span>',
-        '<span class="osk-diamond"></span>',
-        '<span class="osk-sine"><svg viewBox="0 0 32 12" aria-hidden="true"><path pathLength="50" d="M0 6Q4 0 8 6T16 6T24 6T32 6"/></svg></span>',
-        f'<span class="osk-dotwave">{_s(5)}</span>',
-        f'<span class="osk-chart">{_s(4)}</span>',
-        '<span class="osk-typewriter"><span></span></span>',
-        '<span class="osk-underscore"></span>',
-        f'<span class="osk-lines">{_s(3)}</span>',
-        '<span class="osk-pacman"></span>',
-        '<span class="osk-infinity"><svg viewBox="0 0 24 12" aria-hidden="true"><path class="t" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/><path class="a" pathLength="100" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/></svg></span>',
-        '<span class="osk-triangle"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="t" d="M8 2L14.5 13.5H1.5Z"/><path class="a" pathLength="100" d="M8 2L14.5 13.5H1.5Z"/></svg></span>',
-        '<span class="osk-morph"></span>',
-        f'<span class="osk-dotring">{_s(12)}</span>',
-        f'<span class="osk-bubbles">{_s(3)}</span>',
-        f'<span class="osk-stairs">{_s(4)}</span>',
-        '<span class="osk-wifi"><svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1 5Q8 -2 15 5"/><path d="M3.5 7.5Q8 3.5 12.5 7.5"/><path d="M6 10Q8 8.2 10 10"/><circle cx="8" cy="12.5" r="1.2"/></svg></span>',
-        '<span class="osk-bolt"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 0L2 9h5l-1.5 7L14 6.5H9z"/></svg></span>',
-        f'<span class="osk-twinkle">{_s(4)}</span>',
-        '<span class="osk-gradient"></span>',
-    ]
-)
+MORE_MARKUP = "".join([
+    '<span class="osk-dualring"></span>',
+    f'<span class="osk-chase">{_s(8)}</span>',
+    f'<span class="osk-dna">{_s(5)}</span>',
+    '<span class="osk-pendulum"><span></span></span>',
+    f'<span class="osk-cradle">{_s(5)}</span>',
+    '<span class="osk-progress"><span></span></span>',
+    '<span class="osk-stripes"></span>',
+    '<span class="osk-hourglass"><svg viewBox="0 0 12 16" aria-hidden="true"><path d="M1 1h10M1 15h10M2 1c0 5 4 5 4 7s-4 2-4 7M10 1c0 5-4 5-4 7s4 2 4 7"/></svg></span>',
+    '<span class="osk-clock"></span>',
+    '<span class="osk-radar"></span>',
+    '<span class="osk-pulsering"></span>',
+    f'<span class="osk-squares">{_s(4)}</span>',
+    '<span class="osk-diamond"></span>',
+    '<span class="osk-sine"><svg viewBox="0 0 32 12" aria-hidden="true"><path pathLength="50" d="M0 6Q4 0 8 6T16 6T24 6T32 6"/></svg></span>',
+    f'<span class="osk-dotwave">{_s(5)}</span>',
+    f'<span class="osk-chart">{_s(4)}</span>',
+    '<span class="osk-typewriter"><span></span></span>',
+    '<span class="osk-underscore"></span>',
+    f'<span class="osk-lines">{_s(3)}</span>',
+    '<span class="osk-pacman"></span>',
+    '<span class="osk-infinity"><svg viewBox="0 0 24 12" aria-hidden="true"><path class="t" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/><path class="a" pathLength="100" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/></svg></span>',
+    '<span class="osk-triangle"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="t" d="M8 2L14.5 13.5H1.5Z"/><path class="a" pathLength="100" d="M8 2L14.5 13.5H1.5Z"/></svg></span>',
+    '<span class="osk-morph"></span>',
+    f'<span class="osk-dotring">{_s(12)}</span>',
+    f'<span class="osk-bubbles">{_s(3)}</span>',
+    f'<span class="osk-stairs">{_s(4)}</span>',
+    '<span class="osk-wifi"><svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1 5Q8 -2 15 5"/><path d="M3.5 7.5Q8 3.5 12.5 7.5"/><path d="M6 10Q8 8.2 10 10"/><circle cx="8" cy="12.5" r="1.2"/></svg></span>',
+    '<span class="osk-bolt"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 0L2 9h5l-1.5 7L14 6.5H9z"/></svg></span>',
+    f'<span class="osk-twinkle">{_s(4)}</span>',
+    '<span class="osk-gradient"></span>',
+    EXTRA_MARKUP,
+])
 
 
 def _ring_css(cls, n, r, d, dur, anim):
@@ -686,13 +738,168 @@ MORE_CSS_STATIC = r"""
 @keyframes osk-tw{0%,100%{transform:scale(.3);opacity:.2}50%{transform:scale(1);opacity:1}}
 """
 
-MORE_CSS = "\n".join(
-    [
-        MORE_CSS_STATIC.strip(),
-        _ring_css("chase", 8, 6, 3, 0.9, "osk-tail"),
-        _ring_css("dotring", 12, 6.5, 2.2, 1.2, "osk-fade"),
+def _radial(cls, n, span_css, tf, container_extra=""):
+    out = [
+        f".osk-{cls}{{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;{container_extra}}}",
+        f".osk-{cls}>span{{position:absolute;left:50%;top:50%;{span_css}}}",
     ]
-)
+    out += [f".osk-{cls}>span:nth-child({i + 1}){{{tf(i)}}}" for i in range(n)]
+    return "\n".join(out)
+
+
+def _delays(cls, values):
+    return "\n".join(
+        f".osk-{cls}>span:nth-child({i + 1}){{animation-delay:{v:g}s}}"
+        for i, v in enumerate(values) if v
+    )
+
+
+_DOT = "border-radius:9999px;background:var(--osk-m)"
+_ARC = [1, .65, .35]
+
+EXTRA_CSS_STATIC = r"""
+.osk-target{width:6px;height:6px;margin:0 7px;vertical-align:middle;border-radius:9999px;background:var(--osk-s);box-shadow:0 0 0 3px var(--osk-t),0 0 0 4.5px var(--osk-m);animation:osk-breathe 1.4s ease-in-out infinite}
+.osk-squarejump{align-items:flex-end;gap:3px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-squarejump>span{display:block;width:4px;height:4px;border-radius:1px;background:var(--osk-m);animation:osk-jump 1s ease-in-out infinite}
+.osk-seesaw{position:relative;width:20px;height:12px;margin-left:4px;vertical-align:text-bottom}
+.osk-seesaw::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;border-radius:1px;background:var(--osk-m);animation:osk-rock 1.2s ease-in-out infinite alternate}
+.osk-seesaw::after{content:"";position:absolute;left:50%;bottom:0;margin-left:-3px;border-left:3px solid transparent;border-right:3px solid transparent;border-bottom:5px solid var(--osk-t)}
+.osk-propeller{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;animation:osk-spin .9s linear infinite}
+.osk-propeller::before,.osk-propeller::after{content:"";position:absolute;left:50%;top:1px;bottom:1px;width:2px;margin-left:-1px;border-radius:1px;background:var(--osk-m)}
+.osk-propeller::after{transform:rotate(90deg);opacity:.5}
+.osk-cog{box-sizing:border-box;width:14px;height:14px;margin:0 4px;vertical-align:text-bottom;border:3px dashed var(--osk-m);border-radius:9999px;animation:osk-spin 3s linear infinite}
+.osk-dotted{box-sizing:border-box;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;border:2px dotted var(--osk-m);border-radius:9999px;animation:osk-spin 2s linear infinite reverse}
+.osk-marquee{width:28px;height:6px;margin-left:4px;vertical-align:middle;background:radial-gradient(circle,var(--osk-m) 1.6px,transparent 1.8px) 0 0/7px 6px repeat-x;animation:osk-mq .5s linear infinite}
+.osk-flame{width:9px;height:13px;margin:0 4px;vertical-align:text-bottom;background:linear-gradient(to top,var(--osk-s),var(--osk-m));border-radius:50% 50% 50% 50%/70% 70% 30% 30%;transform-origin:50% 100%;animation:osk-flame .9s ease-in-out infinite alternate}
+.osk-drop{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-drop::before{content:"";position:absolute;left:50%;top:0;width:5px;height:6px;margin-left:-2.5px;background:var(--osk-m);border-radius:50% 50% 50% 50%/70% 70% 30% 30%;animation:osk-fall 1.2s ease-in infinite}
+.osk-drop::after{content:"";position:absolute;left:50%;bottom:0;width:14px;height:5px;margin-left:-7px;box-sizing:border-box;border:1.5px solid var(--osk-m);border-radius:50%;opacity:0;animation:osk-splash 1.2s ease-out infinite}
+.osk-rain{align-items:flex-start;gap:3px;height:14px;margin-left:4px;overflow:hidden;vertical-align:text-bottom}
+.osk-rain>span{display:block;width:1.5px;height:5px;border-radius:1px;background:var(--osk-m);animation:osk-rain .9s linear infinite}
+.osk-fill{position:relative;box-sizing:border-box;width:10px;height:14px;margin:0 5px;vertical-align:text-bottom;border:1.5px solid var(--osk-m);border-radius:2px;overflow:hidden}
+.osk-fill::before{content:"";position:absolute;left:0;right:0;bottom:0;height:100%;background:var(--osk-m);transform-origin:50% 100%;animation:osk-fill 1.6s ease-in-out infinite}
+.osk-battery{position:relative;box-sizing:border-box;width:20px;height:10px;margin:0 6px 0 4px;vertical-align:text-bottom;padding:1px;border:1.5px solid var(--osk-m);border-radius:2px}
+.osk-battery::after{content:"";position:absolute;right:-4px;top:50%;width:2px;height:4px;margin-top:-2px;border-radius:0 1px 1px 0;background:var(--osk-m)}
+.osk-battery>span{display:block;width:0;height:100%;background:var(--osk-m);animation:osk-batt 1.6s steps(4) infinite}
+.osk-moon{box-sizing:border-box;width:12px;height:12px;margin:0 5px;vertical-align:middle;border:1px solid var(--osk-m);border-radius:9999px;background:var(--osk-t);animation:osk-moon 1.6s ease-in-out infinite alternate}
+.osk-sun::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:9999px;background:var(--osk-s);animation:osk-breathe 1.6s ease-in-out infinite}
+.osk-heart{width:14px;height:14px;margin:0 4px;vertical-align:text-bottom;color:var(--osk-m);animation:osk-heart 1.2s ease-in-out infinite}
+.osk-star{width:14px;height:14px;margin:0 4px;vertical-align:text-bottom;color:var(--osk-m);animation:osk-star 1.6s ease-in-out infinite}
+.osk-heart>svg,.osk-star>svg{display:block;width:100%;height:100%}
+.osk-spectrum{align-items:center;gap:2px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-spectrum>span{display:block;width:2px;height:100%;border-radius:1px;background:var(--osk-m);animation:osk-wave .9s ease-in-out infinite}
+.osk-bars3{align-items:center;gap:3px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-bars3>span{display:block;width:4px;height:100%;border-radius:2px;background:var(--osk-m);animation:osk-wave .8s ease-in-out infinite}
+.osk-swap{position:relative;width:20px;height:7px;margin-left:4px;vertical-align:middle}
+.osk-swap>span{position:absolute;top:0;width:7px;height:7px;border-radius:9999px}
+.osk-swap>span:nth-child(1){left:0;background:var(--osk-m);animation:osk-sw 1s ease-in-out infinite}
+.osk-swap>span:nth-child(2){left:13px;background:var(--osk-s);animation:osk-sw2 1s ease-in-out infinite}
+.osk-satellite{position:relative;box-sizing:border-box;width:18px;height:18px;margin-left:4px;vertical-align:text-bottom;border:1px solid var(--osk-t);border-radius:9999px}
+.osk-satellite::before{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:9999px;background:var(--osk-s)}
+.osk-satellite>span{position:absolute;top:0;right:0;bottom:0;left:0;animation:osk-spin 1.4s linear infinite}
+.osk-satellite>span::after{content:"";position:absolute;left:50%;top:-3px;width:4px;height:4px;margin-left:-2px;border-radius:9999px;background:var(--osk-m)}
+.osk-atom{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;animation:osk-spin 2.4s linear infinite}
+.osk-atom>span{position:absolute;left:0;top:50%;box-sizing:border-box;width:16px;height:6px;margin-top:-3px;border:1px solid var(--osk-m);border-radius:50%}
+.osk-atom>span:nth-child(2){transform:rotate(60deg)}
+.osk-atom>span:nth-child(3){transform:rotate(120deg)}
+.osk-atom::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:9999px;background:var(--osk-s)}
+.osk-binary{align-items:center;gap:1px;height:14px;margin-left:4px;vertical-align:text-bottom;font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--osk-m)}
+.osk-binary>span{display:block;animation:osk-seq 1.2s ease-in-out infinite}
+.osk-binary>span::before{content:"0"}
+.osk-binary>span:nth-child(1)::before,.osk-binary>span:nth-child(3)::before,.osk-binary>span:nth-child(4)::before{content:"1"}
+.osk-segments{align-items:center;gap:2px;height:6px;margin-left:4px;vertical-align:middle}
+.osk-segments>span{display:block;width:5px;height:4px;border-radius:1px;background:var(--osk-m);animation:osk-seq 1.2s ease-in-out infinite}
+.osk-zigzag{width:24px;height:12px;margin-left:4px;vertical-align:text-bottom;color:var(--osk-m)}
+.osk-zigzag>svg{display:block;width:100%;height:100%;overflow:visible}
+.osk-zigzag path{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:50;stroke-dashoffset:50;animation:osk-ecg 1.6s linear infinite}
+.osk-squaretrace,.osk-hexagon{width:16px;height:16px;margin:0 3px;vertical-align:text-bottom;color:var(--osk-m)}
+.osk-squaretrace>svg,.osk-hexagon>svg{display:block;width:100%;height:100%;overflow:visible}
+.osk-squaretrace path,.osk-hexagon path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.osk-squaretrace .t,.osk-hexagon .t{opacity:.25}
+.osk-squaretrace .a,.osk-hexagon .a{stroke-dasharray:30 70;animation:osk-dash 1.4s linear infinite}
+.osk-pingpong{position:relative;width:30px;height:10px;margin-left:4px;vertical-align:text-bottom}
+.osk-pingpong::before,.osk-pingpong::after{content:"";position:absolute;top:0;bottom:0;width:2px;border-radius:1px;background:var(--osk-t)}
+.osk-pingpong::before{left:0}
+.osk-pingpong::after{right:0}
+.osk-pingpong>span{position:absolute;left:4px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:9999px;background:var(--osk-s);animation:osk-pp .7s linear infinite alternate}
+.osk-traffic{flex-direction:column;align-items:center;justify-content:center;gap:1px;width:6px;height:16px;margin:0 6px;vertical-align:text-bottom}
+.osk-traffic>span{display:block;width:4px;height:4px;border-radius:9999px;background:var(--osk-m);animation:osk-seq 1.2s ease-in-out infinite}
+.osk-search{position:relative;box-sizing:border-box;width:10px;height:10px;margin:0 7px 0 3px;vertical-align:middle;border:1.5px solid var(--osk-m);border-radius:9999px;animation:osk-wob 1.2s ease-in-out infinite alternate}
+.osk-search::after{content:"";position:absolute;left:6.5px;top:6.5px;width:5px;height:1.5px;border-radius:1px;background:var(--osk-m);transform-origin:0 50%;transform:rotate(45deg)}
+.osk-matrix{grid-template-columns:repeat(4,3px);gap:2px;margin-left:4px;vertical-align:text-bottom}
+.osk-matrix>span{display:block;width:3px;height:3px;border-radius:1px;background:var(--osk-m);animation:osk-grid 1.2s ease-in-out infinite}
+.osk-rotsq{width:9px;height:9px;margin:0 5px;vertical-align:middle;border-radius:2px;background:var(--osk-m);animation:osk-rsq 1.4s ease-in-out infinite}
+.osk-quad{grid-template-columns:repeat(2,5px);gap:2px;margin:0 3px 0 4px;vertical-align:text-bottom;animation:osk-quad 1.6s ease-in-out infinite}
+.osk-quad>span{display:block;width:5px;height:5px;border-radius:1px;background:var(--osk-m)}
+.osk-quad>span:nth-child(2),.osk-quad>span:nth-child(3){background:var(--osk-s)}
+.osk-knight{position:relative;width:35px;height:6px;margin-left:4px;vertical-align:middle;background:radial-gradient(circle,var(--osk-t) 2px,transparent 2.2px) 0 0/7px 6px repeat-x}
+.osk-knight::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:radial-gradient(circle,var(--osk-s) 2px,transparent 2.2px) 0 0/7px 6px repeat-x;-webkit-mask:linear-gradient(90deg,transparent,#000,transparent) 0 0/16px 100% no-repeat;mask:linear-gradient(90deg,transparent,#000,transparent) 0 0/16px 100% no-repeat;animation:osk-kr 1s ease-in-out infinite alternate}
+.osk-thought{align-items:flex-end;gap:3px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-thought>span{display:block;border-radius:9999px;background:var(--osk-m);animation:osk-seq 1.2s ease-in-out infinite}
+.osk-thought>span:nth-child(1){width:2px;height:2px}
+.osk-thought>span:nth-child(2){width:3.5px;height:3.5px}
+.osk-thought>span:nth-child(3){width:6px;height:6px}
+.osk-diamonds{align-items:center;gap:4px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-diamonds>span{display:block;width:4px;height:4px;background:var(--osk-m);transform:rotate(45deg);animation:osk-dmd 1.2s ease-in-out infinite}
+.osk-snow{align-items:flex-start;gap:4px;height:14px;margin-left:4px;overflow:hidden;vertical-align:text-bottom}
+.osk-snow>span{display:block;width:3px;height:3px;border-radius:9999px;background:var(--osk-m);animation:osk-snow 1.8s linear infinite}
+@keyframes osk-jump{0%,60%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-8px) rotate(180deg)}}
+@keyframes osk-rock{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+@keyframes osk-mq{to{background-position:7px 0}}
+@keyframes osk-flame{0%{transform:scale(1,.85) skewX(-4deg);opacity:.7}50%{transform:scale(.9,1.05) skewX(3deg);opacity:1}100%{transform:scale(1.05,.9) skewX(-2deg);opacity:.85}}
+@keyframes osk-fall{0%{transform:translateY(0);opacity:1}55%{transform:translateY(8px);opacity:1}56%,100%{transform:translateY(8px);opacity:0}}
+@keyframes osk-splash{0%,55%{transform:scale(.1);opacity:0}60%{opacity:1}100%{transform:scale(1);opacity:0}}
+@keyframes osk-rain{0%{transform:translateY(-6px);opacity:0}30%{opacity:1}100%{transform:translateY(14px);opacity:0}}
+@keyframes osk-fill{0%{transform:scaleY(0)}70%,100%{transform:scaleY(1)}}
+@keyframes osk-batt{0%{width:0}100%{width:100%}}
+@keyframes osk-moon{from{box-shadow:inset 0 0 0 0 var(--osk-m)}to{box-shadow:inset 13px 0 0 0 var(--osk-m)}}
+@keyframes osk-heart{0%,60%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.18)}}
+@keyframes osk-star{0%,100%{transform:rotate(0) scale(.8)}50%{transform:rotate(72deg) scale(1.1)}}
+@keyframes osk-sw{0%,100%{transform:translateX(0)}50%{transform:translateX(13px) scale(.8)}}
+@keyframes osk-sw2{0%,100%{transform:translateX(0)}50%{transform:translateX(-13px) scale(.8)}}
+@keyframes osk-pp{from{transform:translateX(0)}to{transform:translateX(20px)}}
+@keyframes osk-wob{from{transform:translate(-2px,-1px) rotate(-12deg)}to{transform:translate(2px,1px) rotate(12deg)}}
+@keyframes osk-rsq{0%{transform:rotate(0) scale(1)}50%{transform:rotate(90deg) scale(.6)}100%{transform:rotate(180deg) scale(1)}}
+@keyframes osk-quad{0%,15%{transform:rotate(0)}50%{transform:rotate(180deg) scale(.85)}85%,100%{transform:rotate(360deg)}}
+@keyframes osk-kr{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:100% 0;mask-position:100% 0}}
+@keyframes osk-dmd{0%,100%{opacity:.25;transform:rotate(45deg) scale(.7)}40%{opacity:1;transform:rotate(45deg) scale(1.15)}}
+@keyframes osk-snow{0%{transform:translate(0,-4px);opacity:0}20%{opacity:1}50%{transform:translate(2px,5px)}80%{opacity:1}100%{transform:translate(-1px,14px);opacity:0}}
+"""
+
+EXTRA_CSS = "\n".join([
+    EXTRA_CSS_STATIC.strip(),
+    _radial("spiral", 8, f"width:2.5px;height:2.5px;margin:-1.25px 0 0 -1.25px;{_DOT};animation:osk-fade 1s linear infinite",
+            lambda i: f"transform:rotate({i * 47}deg) translateY(-{1.2 + i * .85:.2f}px);animation-delay:-{i / 8:.3f}s"),
+    _radial("ios", 12, f"width:1.5px;height:4px;margin:-2px 0 0 -.75px;border-radius:1px;background:var(--osk-m);animation:osk-fade 1s linear infinite",
+            lambda i: f"transform:rotate({i * 30}deg) translateY(-5px);animation-delay:-{i / 12:.3f}s"),
+    _radial("comet", 6, f"width:4px;height:4px;margin:-2px 0 0 -2px;{_DOT}",
+            lambda i: f"transform:rotate(-{i * 24}deg) translateY(-6px) scale({1 - i * .13:.2f});opacity:{1 - i * .16:.2f}",
+            "animation:osk-spin .9s linear infinite;"),
+    _radial("sun", 8, "width:1.5px;height:3.5px;margin:-1.75px 0 0 -.75px;border-radius:1px;background:var(--osk-m)",
+            lambda i: f"transform:rotate({i * 45}deg) translateY(-7px)",
+            "animation:osk-spin 6s linear infinite;"),
+    _radial("trio", 3, f"width:4px;height:4px;margin:-2px 0 0 -2px;{_DOT}",
+            lambda i: f"transform:rotate({i * 120}deg) translateY(-6px);opacity:{_ARC[i]}",
+            "animation:osk-spin .9s linear infinite;"),
+    _delays("squarejump", [0, .15, .3]),
+    _delays("rain", [0, -.3, -.6, -.15, -.45]),
+    _delays("spectrum", [0, -.5, -.2, -.7, -.35, -.1, -.6]),
+    _delays("bars3", [0, -.15, -.3]),
+    _delays("binary", [0, .15, .3, .45, .6]),
+    _delays("segments", [0, .12, .24, .36, .48, .6]),
+    _delays("traffic", [0, .2, .4]),
+    _delays("matrix", [-((i * 7) % 11) * .1 for i in range(16)]),
+    _delays("thought", [0, .2, .4]),
+    _delays("diamonds", [0, .15, .3]),
+    _delays("snow", [0, -.45, -.9, -1.35]),
+])
+
+MORE_CSS = "\n".join([
+    MORE_CSS_STATIC.strip(),
+    _ring_css("chase", 8, 6, 3, 0.9, "osk-tail"),
+    _ring_css("dotring", 12, 6.5, 2.2, 1.2, "osk-fade"),
+    EXTRA_CSS,
+])
 
 
 OSK_CSS_BASE = r"""
@@ -884,9 +1091,7 @@ def _build_generated_css() -> str:
     return "\n".join(rules)
 
 
-OSK_CSS = "\n".join(
-    [OSK_CSS_BASE.strip(), OSK_CSS_NEW.strip(), MORE_CSS, _build_generated_css()]
-)
+OSK_CSS = "\n".join([OSK_CSS_BASE.strip(), OSK_CSS_NEW.strip(), MORE_CSS, _build_generated_css()])
 
 LOADER_SCRIPT = r"""
 (function () {
@@ -1153,7 +1358,7 @@ LOADER_SCRIPT = r"""
     attr: 'data-osk',
     names: CFG.names,
     fallback: CFG.fallback,
-    defaultPreview: 'dotring',
+    defaultPreview: 'cursor',
     title: 'Message Loading Indicator',
     note: 'How a reply shows that it is still loading. Saved in this browser.',
     place: function () {
@@ -1177,7 +1382,7 @@ LOADER_SCRIPT = r"""
     attr: 'data-osk-think',
     names: CFG.thinkNames,
     fallback: CFG.thinkFallback,
-    defaultPreview: 'dotring',
+    defaultPreview: 'spinner',
     title: 'Thinking Indicator',
     note: 'The icon beside the Thinking header while a model reasons. Saved in this browser.',
     place: function () {
