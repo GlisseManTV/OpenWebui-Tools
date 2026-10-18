@@ -1,10 +1,10 @@
 """
 title: Message Loading Indicator
-description: Message Loading Indicator + Thinking Studio. Adds settings under Settings > Interface so each user picks how a reply shows it is loading (100 styles plus a Random option), which icon sits beside the Thinking header, and replaces the bland 'Thinking...' text with rotating thinking words (Claude-style, dev, playful, hacker, zen, Hebrew, custom...) with animated effects, fonts, colors, speed and an optional live timer. Published into /static/loader.js through the Shared Assets Protocol, so it coexists with Theme Designer Pro and any other plugin using it.
+description: Message Loading Indicator + Thinking Studio. Adds settings under Settings > Interface so each user picks how a reply shows it is loading (100 styles plus a Random option), which icon sits beside the Thinking header, and replaces the bland 'Thinking...' text with rotating thinking words (Claude-style, dev, playful, hacker, zen, custom...) with animated effects, fonts, colors, speed and an optional live timer. Published into /static/loader.js through the Shared Assets Protocol, so it coexists with Theme Designer Pro and any other plugin using it.
 author: ichrist (adapted from G30 function)
 author_url: https://openwebui.com/u/ichrist
 funding_url:
-version: 2.2.2
+version: 2.3.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -1568,9 +1568,23 @@ TW_COLORS = {
     "pink": ("#ec4899", "#f9a8d4", "#be185d"),
     "gold": ("#f59e0b", "#fde68a", "#b45309"),
     "cyan": ("#06b6d4", "#67e8f9", "#0e7490"),
+}
+# True multi-stop gradients (start, middle, end). Painted across the whole phrase.
+TW_GRADIENTS = {
     "aurora": ("#34d399", "#60a5fa", "#a78bfa"),
     "sunset": ("#f97316", "#ec4899", "#8b5cf6"),
+    "ocean": ("#22d3ee", "#3b82f6", "#4338ca"),
+    "fire": ("#fde047", "#f97316", "#dc2626"),
+    "candy": ("#f472b6", "#c084fc", "#60a5fa"),
+    "forest": ("#bef264", "#22c55e", "#0f766e"),
+    "twilight": ("#6366f1", "#a855f7", "#f472b6"),
+    "peach": ("#fb7185", "#fb923c", "#fbbf24"),
+    "citrus": ("#facc15", "#a3e635", "#22c55e"),
+    "berry": ("#be185d", "#9333ea", "#4f46e5"),
+    "rosegold": ("#fb7185", "#f9a8d4", "#fbbf24"),
+    "cyberpunk": ("#22d3ee", "#a855f7", "#ec4899"),
 }
+TW_COLORS.update(TW_GRADIENTS)
 TW_COLOR_NAMES = {
     "default": "Default",
     "random": "Random (changes every phrase)",
@@ -1582,8 +1596,18 @@ TW_COLOR_NAMES = {
     "pink": "Pink",
     "gold": "Gold",
     "cyan": "Cyan",
-    "aurora": "Aurora",
-    "sunset": "Sunset",
+    "aurora": "Aurora (gradient)",
+    "sunset": "Sunset (gradient)",
+    "ocean": "Ocean (gradient)",
+    "fire": "Fire (gradient)",
+    "candy": "Candy (gradient)",
+    "forest": "Forest (gradient)",
+    "twilight": "Twilight (gradient)",
+    "peach": "Peach (gradient)",
+    "citrus": "Citrus (gradient)",
+    "berry": "Berry (gradient)",
+    "rosegold": "Rose Gold (gradient)",
+    "cyberpunk": "Cyberpunk (gradient)",
 }
 TW_RHYTHM_NAMES = {
     "default": "Default",
@@ -1627,8 +1651,10 @@ html[data-osk-tw-timer="on"] .osk-tw-t{display:inline}
 .osk-range-v{min-width:2.4rem;text-align:right;font-size:.75rem;font-variant-numeric:tabular-nums;color:var(--color-gray-500,#6b7280)}
 .osk-range-r{padding:0;border:0;background:none;font-size:.6875rem;text-decoration:underline;cursor:pointer;color:var(--color-gray-400,#9ca3af)}
 .osk-range-r[hidden]{display:none}
-.osk-pv-s[data-color="aurora"],.osk-pv-s[data-color="sunset"],.osk-pv-s[data-color="random"]{background:linear-gradient(90deg,var(--tw-a),var(--tw-b),var(--tw-c));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .osk-pv-s[data-color="random"]{--tw-a:#f87171;--tw-b:#fbbf24;--tw-c:#60a5fa}
+.osk-pv-s[data-color="random"]{background:linear-gradient(90deg,var(--tw-a),var(--tw-b),var(--tw-c));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.osk-tw-w[data-grad="1"]{background-image:linear-gradient(90deg,var(--tw-a),var(--tw-b),var(--tw-c));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+@keyframes osk-tw-shim2{from{background-position:200% 0,0 0}to{background-position:-100% 0,0 0}}
 @keyframes osk-tw-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @keyframes osk-tw-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-5px)}}
 @keyframes osk-tw-shim{from{background-position:200% 0}to{background-position:-100% 0}}
@@ -1747,6 +1773,22 @@ def _tw_css() -> str:
     fx(
         "pulse",
         "animation:osk-tw-in .4s ease both,osk-tw-pulse 1.6s ease-in-out .4s infinite",
+    )
+
+    # Shimmer over a gradient: keep the gradient as base, sweep a highlight on top.
+    out.append(
+        '.osk-tw-w[data-fx="shimmer"][data-grad="1"]{'
+        "background:linear-gradient(100deg,transparent 38%,rgba(255,255,255,.8) 50%,transparent 62%) 200% 0/250% 100% no-repeat,"
+        "linear-gradient(90deg,var(--tw-a),var(--tw-b),var(--tw-c)) 0 0/100% 100% no-repeat;"
+        + clip
+        + ";animation:osk-tw-in .4s ease both,osk-tw-shim2 1.8s linear infinite}"
+    )
+    # Gradient colors in the dropdown preview.
+    out.append(
+        ",".join(f'.osk-pv-s[data-color="{k}"]' for k in TW_GRADIENTS)
+        + "{background:linear-gradient(90deg,var(--tw-a),var(--tw-b),var(--tw-c));"
+        + clip
+        + "}"
     )
 
     for k, decl in TW_FONTS.items():
@@ -2214,16 +2256,29 @@ LOADER_SCRIPT = r"""
       }, 45);
     }
 
+    // Per-letter color along a 3-stop gradient (t = 0..1). Letter effects animate
+    // each letter with transforms, which breaks background-clip:text on the parent.
+    function lc(t) {
+      if (t <= 0.5) return 'color-mix(in oklab,var(--tw-a) ' + Math.round((1 - t * 2) * 100) + '%,var(--tw-b))';
+      return 'color-mix(in oklab,var(--tw-b) ' + Math.round((1 - (t - 0.5) * 2) * 100) + '%,var(--tw-c))';
+    }
+
     function build(node, text, fx) {
       node.setAttribute('data-text', text);
       node.style.setProperty('--n', String(Math.max(1, text.length)));
       if (LETTERS[fx]) {
         node.textContent = '';
         var chars = Array.from(text);
+        var gl = node.getAttribute('data-grad') === 'l';
         for (var i = 0; i < chars.length; i++) {
           var l = document.createElement('span');
           l.className = 'osk-l';
           l.style.setProperty('--i', String(i));
+          if (gl) {
+            var lcol = lc(chars.length > 1 ? i / (chars.length - 1) : 0);
+            l.style.color = lcol;
+            l.style.setProperty('-webkit-text-fill-color', lcol);
+          }
           l.textContent = chars[i] === ' ' ? '\u00a0' : chars[i];
           node.appendChild(l);
         }
@@ -2247,6 +2302,9 @@ LOADER_SCRIPT = r"""
       w.setAttribute('data-font', pickFont());
       st.hold = holdFor();
       w.style.setProperty('--osk-tw-dur', st.hold + 'ms');
+      if (T.gradients.indexOf(ROOT.getAttribute('data-osk-tw-color')) > -1 && fx !== 'neon' && fx !== 'glow') {
+        w.setAttribute('data-grad', LETTERS[fx] ? 'l' : '1');
+      }
       build(w, next(st, wordsFor(st.pack)), fx);
       if (ROOT.getAttribute('data-osk-tw-color') === 'random') {
         var c = rand(PALETTE);
@@ -2632,7 +2690,7 @@ class Event:
         )
         default_words_color: TW_COLOR_LITERAL = Field(
             default="orange",
-            description="Default color for the thinking words: random (changes every phrase), theme, orange, blue, purple, green, pink, gold, cyan, aurora, sunset.",
+            description="Default color for the thinking words: random (changes every phrase), theme, orange, blue, purple, green, pink, gold, cyan, or a gradient: aurora, sunset, ocean, fire, candy, forest, twilight, peach, citrus, berry, rosegold, cyberpunk.",
         )
         default_words_interval: float = Field(
             default=2.4,
@@ -2702,6 +2760,7 @@ class Event:
                     "dots": bool(valves.animated_dots),
                     "pattern": valves.label_pattern or "thinking|reasoning",
                     "glyphs": TW_GLYPHS,
+                    "gradients": list(TW_GRADIENTS),
                     "fxPool": TW_FX_POOL,
                     "fontPool": TW_FONT_POOL,
                     "interval": float(valves.default_words_interval),
