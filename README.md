@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d0221,50:7c3aed,100:06b6d4&height=220&section=header&text=Open%20WebUI%20Tools&fontSize=54&fontColor=fff&animation=fadeIn&fontAlignY=36&desc=26%20tools%20to%20supercharge%20your%20AI%20%E2%80%94%20install%20in%2030%20seconds&descAlignY=57&descSize=17" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d0221,50:7c3aed,100:06b6d4&height=220&section=header&text=Open%20WebUI%20Tools&fontSize=54&fontColor=fff&animation=fadeIn&fontAlignY=36&desc=27%20tools%20to%20supercharge%20your%20AI%20%E2%80%94%20install%20in%2030%20seconds&descAlignY=57&descSize=17" />
 
 <br/>
 
@@ -12,7 +12,7 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/26_Tools-ready%20to%20install-7c3aed?style=flat-square&labelColor=2e1065" />
+  <img src="https://img.shields.io/badge/27_Tools-ready%20to%20install-7c3aed?style=flat-square&labelColor=2e1065" />
   <img src="https://img.shields.io/badge/30_Seconds-to%20set%20up-5563e5?style=flat-square&labelColor=232368" />
   <img src="https://img.shields.io/badge/Zero_API_Keys-100%25%20free%20%26%20local-2d8ddc?style=flat-square&labelColor=17376b" />
   <img src="https://img.shields.io/badge/Self_Hosted-privacy%20first-06b6d4?style=flat-square&labelColor=0c4a6e" />
@@ -44,6 +44,7 @@
   <a href="#-ask-user"><img src="https://img.shields.io/badge/-🧩_Ask_User-06b6d4?style=flat-square&labelColor=0e7490" /></a>
   <a href="#-persona-studio"><img src="https://img.shields.io/badge/-🎭_Personas-06b6d4?style=flat-square&labelColor=0e7490" /></a>
   <a href="#-omniscient-orchestrator"><img src="https://img.shields.io/badge/-🌌_Orchestrator-06b6d4?style=flat-square&labelColor=0e7490" /></a>
+  <a href="#-message-loading-indicator--thinking-studio"><img src="https://img.shields.io/badge/-⏳_Loading_Indicator-06b6d4?style=flat-square&labelColor=0e7490" /></a>
 </p>
 <p>
   <img src="https://img.shields.io/badge/🌍_Information_%26_Reference--f59e0b?style=flat-square&labelColor=92400e" /><br/>
@@ -125,7 +126,7 @@ This allows embedded tool UIs to access local resources and render at full size.
 |----------|-------|
 | 📡 **Media & Entertainment** · `7 tools` | [🎬 Jellyfin](#-jellyfin-media-player) · [📺 YouTube](#-youtube-player) · [📰 News Reader](#-news-reader) · [🌐 Reddit](#-reddit-explorer) · [🎙 Podcasts](#-podcast-player) · [🎵 Lyrics](#-genius-song-lyrics) · [📻 Radio](#-radio) |
 | 🏆 **Sports & Gaming** · `4 tools` | [🏟️ Sports](#-sports-tool) · [🎮 Steam](#-steam-game-info) · [🎯 HLTV CS2](#-hltv-tool) · [🎮 Pokédex](#-pokédex) |
-| 🤖 **AI & Workflow** · `4 tools` | [🧠 Thinking Filter](#-thinking-filter) · [🧩 Ask User](#-ask-user) · [🎭 Personas](#-persona-studio) · [🌌 Orchestrator](#-omniscient-orchestrator) |
+| 🤖 **AI & Workflow** · `5 tools` | [🧠 Thinking Filter](#-thinking-filter) · [🧩 Ask User](#-ask-user) · [🎭 Personas](#-persona-studio) · [🌌 Orchestrator](#-omniscient-orchestrator) · [⏳ Loading Indicator](#-message-loading-indicator--thinking-studio) |
 | 🌍 **Information & Reference** · `4 tools` | [🌤️ Weather](#-weather) · [📖 Wikipedia](#-wikipedia) · [🔤 Pronunciation](#-language-pronunciation-guide) · [📈 Stocks](#-stock-info-tool) |
 | 🎨 **Image & Video Generation** · `3 tools` ⚙️ | [🎥 LTX Video](#-ltx-23-video-generator) · [🎨 Qwen Edit](#-qwen-image-edit) · [🔍 RTX Upscale](#-rtx-image-upscaler) |
 | 🛠️ **Utilities** · `4 tools` | [📱 QR Codes](#-qr-code-generator) · [🛠️ Quick Utils](#-quick-utils) · [😂 Jokes](#-joke-tool) · [💾 VRAM Unload](#-vram-unload) |
@@ -723,7 +724,7 @@ show me Garchomp
 
 ---
 
-## <img src="https://img.shields.io/badge/🤖_AI_%26_Workflow-4_tools-06b6d4?style=for-the-badge&labelColor=0e7490" />
+## <img src="https://img.shields.io/badge/🤖_AI_%26_Workflow-5_tools-06b6d4?style=for-the-badge&labelColor=0e7490" />
 
 <details>
 <summary><h2>🧠 Thinking Filter</h2>
@@ -928,6 +929,133 @@ Brainstorming with structured creative options
 Planning projects or technical roadmaps
 Any prompt where you'd normally need 3 rounds of re-prompting
 ```
+
+</details>
+
+</details>
+
+---
+
+<details>
+<summary><h2>⏳ Message Loading Indicator + Thinking Studio</h2>
+<blockquote>Make every reply feel alive. Pick from 100 animated loading styles, swap the icon beside the Thinking header, and replace the bland "Thinking…" label with rotating Claude-style phrases — animated, colored, styled and timed exactly how you like. All from a new set of settings under <b>Settings → Interface</b>.</blockquote>
+
+[![Install on Open WebUI](https://img.shields.io/badge/⬇️_Install-Open_WebUI_Marketplace-06b6d4?style=for-the-badge&labelColor=0e7490)](https://openwebui.com/u/ichrist)
+</summary>
+
+> 🧩 **This one is a Function, not a Tool.** Install it under **Admin Panel → Functions** and switch it on once — there is nothing to toggle per chat. Requires **Open WebUI 0.11.0+**. Adapted from the G30 function.
+
+| Feature | Detail |
+|---------|--------|
+| ⏳ 100 loading styles | Cursors, spinners, orbits, equalizers, heartbeats, DNA helixes, gyroscopes, fireflies and many more — plus the legacy bars and shimmer skeletons |
+| 🎲 Random mode | A fresh style for every message (or every Thinking block) |
+| 🧠 Thinking icon | Choose the icon beside the Thinking header — compact styles only, or hide it entirely |
+| 💬 Thinking Words | Rotating phrases replace the plain "Thinking…" label while a model reasons |
+| 📚 9 word packs | Claude-style (100+ phrases), Dev & Debug, Playful, Science Lab, Hacker Terminal, Zen, Minimal, Random Mix, and your own Custom list |
+| ✨ 18 phrase effects | Shimmer, gradient, rainbow, neon, glow, fade, slot slide, typewriter, decode/scramble, blur, letter wave, letter drop, cascade, glitch, pop, flip, wipe reveal, pulse — or Random |
+| 🔤 Fonts & colors | 8 font styles and 9 color palettes (including Aurora and Sunset gradients), each with a Random option |
+| ⏱️ Timing controls | Interval slider (0.4–10 s), Steady or Natural rhythm (±40%), and an optional live seconds timer |
+| 🌐 Multilingual labels | Works with any UI language via a configurable label regex; Hebrew and other RTL phrases render correctly |
+| 👤 Per-user | Every user picks their own look — saved in the browser, no server round-trip |
+| 🔁 Live reload | Changes to the function propagate across workers via Redis without a restart |
+| 🤝 Coexists with other plugins | Publishes through the Shared Assets Protocol into `/static/loader.js`, so it plays nicely with Theme Designer Pro and any other plugin using it |
+| ♿ Accessible | Respects `prefers-reduced-motion`, keyboard-navigable dropdowns, screen-reader text for the original label |
+| 🔑 Zero config | No API keys, no dependencies beyond Open WebUI itself |
+
+<details>
+<summary><b>⚙️ Setup (3 steps)</b></summary>
+
+1. Add the function under **Admin Panel → Functions** and enable it
+2. Reload Open WebUI
+3. Go to **Settings → Interface** and scroll down — the new settings appear below the chat-bubble option
+
+> If the settings don't show up, hard-refresh the page so the updated `/static/loader.js` is fetched.
+
+</details>
+
+<details>
+<summary><b>🎛️ User settings (Settings → Interface)</b></summary>
+
+| Setting | What it controls |
+|---------|------------------|
+| **Message Loading Indicator** | How a reply shows that it is still loading (100 styles + Random) |
+| **Thinking Indicator** | The icon beside the Thinking header while a model reasons |
+| **Thinking Words** | Which phrase pack replaces the "Thinking…" label |
+| **Phrase Effect** | How each phrase animates in |
+| **Phrase Font** | Typeface for the phrases |
+| **Phrase Color** | Color or gradient of the phrases |
+| **Change Interval** | Slider — how long each phrase stays on screen |
+| **Change Rhythm** | Steady or Natural (varies each phrase by up to 40%) |
+| **Thinking Timer** | Live seconds counter next to the phrases |
+
+Every dropdown shows a live animated preview of each option.
+
+</details>
+
+<details>
+<summary><b>📚 Word packs</b></summary>
+
+| Pack | Vibe |
+|------|------|
+| ✺ **Claude-style** | "Pondering", "Connecting the dots", "Untangling this" and 100+ more |
+| </> **Dev & Debug** | Compiling thoughts, squashing commits, rubber-ducking |
+| ✨ **Playful** | Consulting the oracle, herding thoughts, asking the hamsters |
+| ⚗ **Science Lab** | Formulating hypotheses, calibrating, isolating variables |
+| >_ **Hacker Terminal** | Decrypting the question, booting reasoning core, sudo thinking |
+| ☯ **Zen** | Breathing, finding clarity, quieting the noise |
+| · **Minimal** | Thinking, Reasoning, Working |
+| ∞ **Random Mix** | Every pack shuffled together |
+| ✎ **Custom** | Your own list, one phrase per line |
+| … **Original** | Keep Open WebUI's stock "Thinking…" text |
+
+</details>
+
+<details>
+<summary><b>⚙️ Admin valves</b></summary>
+
+These set what **Default** means for users who haven't picked anything yet.
+
+| Valve | Default | What it does |
+|-------|---------|--------------|
+| `default_style` | `default` | Default message loading style (`random` rolls a new one per message) |
+| `default_thinking_style` | `default` | Default Thinking header icon (`none` hides it) |
+| `default_thinking_words` | `claude` | Default word pack (`off` keeps the original label) |
+| `default_words_effect` | `shimmer` | Default phrase animation |
+| `default_words_font` | `theme` | Default phrase font |
+| `default_words_color` | `orange` | Default phrase color |
+| `default_words_interval` | `2.4` | Seconds each phrase stays on screen |
+| `default_words_rhythm` | `steady` | `steady` or `natural` |
+| `default_words_timer` | `off` | Show a live seconds counter |
+| `words_order` | `shuffle` | `shuffle` plays every phrase once before repeating; `sequential` plays in list order |
+| `animated_dots` | `true` | Animated trailing dots after each phrase |
+| `custom_words` | *(empty)* | Your own phrases, one per line, for the Custom pack |
+| `label_pattern` | `thinking\|reasoning` | Case-insensitive regex matching Open WebUI's thinking label — add your UI language, e.g. `thinking\|reasoning\|pensando\|denkt` |
+
+</details>
+
+<details>
+<summary><b>🗣️ Try it</b></summary>
+
+```
+Settings → Interface → Message Loading Indicator → Random
+Settings → Interface → Thinking Words → Hacker Terminal
+Settings → Interface → Phrase Effect → Decode / Scramble
+Settings → Interface → Thinking Timer → Show seconds
+```
+
+Then ask any reasoning model a hard question and watch it think in style.
+
+</details>
+
+<details>
+<summary><b>🛠️ Troubleshooting</b></summary>
+
+| Symptom | Fix |
+|---------|-----|
+| Settings don't appear | Make sure the function is enabled, then hard-refresh the page |
+| Words aren't replacing "Thinking…" | Add your UI language to `label_pattern` |
+| Other plugin's loader disappeared | Both plugins must use the Shared Assets Protocol — update to the latest version of each |
+| Animations look static | Your OS has "reduce motion" enabled; the function respects it |
 
 </details>
 
@@ -1489,6 +1617,8 @@ All tools install the same way — takes about 30 seconds.
 ```
 
 > 💡 **Tip:** Enable only the tools you need in each chat — keeping the tool list focused helps the LLM pick the right one every time.
+
+> 🧩 **Functions vs Tools:** Items like the Thinking Filter and the Message Loading Indicator are Open WebUI *Functions*. Install them under **Admin Panel → Functions** and enable them once — they don't appear in the per-chat 🔧 Tools toggle.
 
 ---
 
