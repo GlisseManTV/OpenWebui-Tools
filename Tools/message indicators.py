@@ -4,7 +4,7 @@ description: Message Loading Indicator + Thinking Studio. Adds settings under Se
 author: ichrist (adapted from G30 function)
 author_url: https://openwebui.com/u/ichrist
 funding_url:
-version: 2.3.0
+version: 2.4.0
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -1568,6 +1568,21 @@ TW_COLORS = {
     "pink": ("#ec4899", "#f9a8d4", "#be185d"),
     "gold": ("#f59e0b", "#fde68a", "#b45309"),
     "cyan": ("#06b6d4", "#67e8f9", "#0e7490"),
+    "red": ("#ef4444", "#fca5a5", "#b91c1c"),
+    "tangerine": ("#f97316", "#fdba74", "#c2410c"),
+    "yellow": ("#eab308", "#fde047", "#a16207"),
+    "lime": ("#84cc16", "#bef264", "#4d7c0f"),
+    "teal": ("#14b8a6", "#5eead4", "#0f766e"),
+    "sky": ("#0ea5e9", "#7dd3fc", "#0369a1"),
+    "indigo": ("#6366f1", "#a5b4fc", "#4338ca"),
+    "violet": ("#7c3aed", "#c4b5fd", "#5b21b6"),
+    "fuchsia": ("#d946ef", "#f0abfc", "#a21caf"),
+    "rose": ("#f43f5e", "#fda4af", "#be123c"),
+    "brown": ("#92400e", "#d97706", "#451a03"),
+    "grey": ("#6b7280", "#9ca3af", "#4b5563"),
+    "silver": ("#9ca3af", "#e5e7eb", "#6b7280"),
+    "white": ("#ffffff", "#e5e7eb", "#9ca3af"),
+    "black": ("#111827", "#4b5563", "#000000"),
 }
 # True multi-stop gradients (start, middle, end). Painted across the whole phrase.
 TW_GRADIENTS = {
@@ -1596,6 +1611,22 @@ TW_COLOR_NAMES = {
     "pink": "Pink",
     "gold": "Gold",
     "cyan": "Cyan",
+    "red": "Red",
+    "tangerine": "Orange (bright)",
+    "yellow": "Yellow",
+    "lime": "Lime",
+    "teal": "Teal",
+    "sky": "Sky Blue",
+    "indigo": "Indigo",
+    "violet": "Violet",
+    "fuchsia": "Fuchsia",
+    "rose": "Rose",
+    "brown": "Brown",
+    "grey": "Grey",
+    "silver": "Silver",
+    "white": "White",
+    "black": "Black",
+    "custom": "Custom (pick any color)",
     "aurora": "Aurora (gradient)",
     "sunset": "Sunset (gradient)",
     "ocean": "Ocean (gradient)",
@@ -1797,6 +1828,12 @@ def _tw_css() -> str:
         out.append(
             f'html[data-osk-tw-color="{k}"],.osk-pv-s[data-color="{k}"]{{--tw-a:{a};--tw-b:{b};--tw-c:{c}}}'
         )
+    # Custom color: the picker writes --osk-tw-custom-a/b/c on <html>.
+    out.append(
+        'html[data-osk-tw-color="custom"],.osk-pv-s[data-color="custom"]{'
+        "--tw-a:var(--osk-tw-custom-a,#d97757);--tw-b:var(--osk-tw-custom-b,#ffb59a);--tw-c:var(--osk-tw-custom-c,#b4532f)}"
+        ".osk-colorin{width:30px;height:20px;padding:0;border:1px solid var(--color-gray-300,#d1d5db);border-radius:4px;background:none;cursor:pointer}"
+    )
     out.append(
         "@media (prefers-reduced-motion:reduce){.osk-tw-w,.osk-tw-w::before,.osk-tw-w::after,.osk-l,.osk-tw-d i,.osk-pv-s{"
         "animation:none!important;background:none!important;clip-path:none!important;filter:none!important;text-shadow:none!important;"
@@ -2487,7 +2524,7 @@ LOADER_SCRIPT = r"""
       function hasStored() { try { return localStorage.getItem(KEY_MS) !== null; } catch (e) { return false; } }
       function ensureRow() {
         if (document.getElementById(id)) return;
-        var at = after('osk-tw-color')();
+        var at = after('osk-tw-custom')();
         if (!at) return;
         var block = document.createElement('div');
         block.id = id;
@@ -2544,6 +2581,74 @@ LOADER_SCRIPT = r"""
       window.addEventListener('storage', function (evt) { if (evt.key === KEY_MS) baseMs = storedMs(); });
       return { check: function () {}, ensureRow: ensureRow, apply: function () { baseMs = storedMs(); } };
     })();
+    // Custom color picker: any color. Used when Phrase Color is set to Custom.
+    var KEY_CC = 'owui-thinking-words-custom-color';
+    function customHex() {
+      try {
+        var v = localStorage.getItem(KEY_CC);
+        if (v && /^#[0-9a-f]{6}$/i.test(v)) return v;
+      } catch (e) {}
+      return '#d97757';
+    }
+    function shade(hex, t) {
+      var n = parseInt(hex.slice(1), 16);
+      var ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (v) {
+        var tgt = t > 0 ? 255 : 0;
+        return Math.round(v + (tgt - v) * Math.abs(t));
+      });
+      return '#' + ch.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join('');
+    }
+    function applyCustom() {
+      var hex = customHex();
+      ROOT.style.setProperty('--osk-tw-custom-a', hex);
+      ROOT.style.setProperty('--osk-tw-custom-b', shade(hex, 0.45));
+      ROOT.style.setProperty('--osk-tw-custom-c', shade(hex, -0.3));
+    }
+    applyCustom();
+    var customRow = (function () {
+      var id = 'osk-tw-custom';
+      function ensureRow() {
+        if (document.getElementById(id)) return;
+        var at = after('osk-tw-color')();
+        if (!at) return;
+        var block = document.createElement('div');
+        block.id = id;
+        var line = document.createElement('div');
+        line.className = at.rowClass || 'flex items-center justify-between gap-2.5';
+        var name = document.createElement('div');
+        name.id = id + '-label';
+        name.className = at.nameClass || 'min-w-0 text-xs text-gray-600 dark:text-gray-400';
+        name.textContent = 'Custom Color';
+        var right = document.createElement('div');
+        right.className = 'osk-range-row';
+        var input = document.createElement('input');
+        input.type = 'color';
+        input.className = 'osk-colorin';
+        input.value = customHex();
+        input.setAttribute('aria-labelledby', id + '-label');
+        var val = document.createElement('span');
+        val.className = 'osk-range-v';
+        val.textContent = input.value;
+        input.addEventListener('input', function () {
+          try { localStorage.setItem(KEY_CC, input.value); } catch (e) {}
+          val.textContent = input.value;
+          applyCustom();
+        });
+        right.appendChild(input);
+        right.appendChild(val);
+        line.appendChild(name);
+        line.appendChild(right);
+        var note = document.createElement('p');
+        note.className = 'mt-1.5 text-[0.6875rem] text-gray-400 dark:text-gray-600';
+        note.textContent = 'Pick any color, then choose \u201cCustom\u201d in Phrase Color above to use it.';
+        block.appendChild(line);
+        block.appendChild(note);
+        at.parent.insertBefore(block, at.before);
+      }
+      window.addEventListener('storage', function (evt) { if (evt.key === KEY_CC) applyCustom(); });
+      return { check: function () {}, ensureRow: ensureRow, apply: applyCustom };
+    })();
+    pickers.push(customRow);
     pickers.push(slider);
 
     add('osk-tw-rhythm', 'owui-thinking-words-rhythm', 'data-osk-tw-rhythm', T.rhythmNames, T.fallbacks.rhythm,
@@ -2690,7 +2795,7 @@ class Event:
         )
         default_words_color: TW_COLOR_LITERAL = Field(
             default="orange",
-            description="Default color for the thinking words: random (changes every phrase), theme, orange, blue, purple, green, pink, gold, cyan, or a gradient: aurora, sunset, ocean, fire, candy, forest, twilight, peach, citrus, berry, rosegold, cyberpunk.",
+            description="Default color for the thinking words: random (changes every phrase), theme, orange, blue, purple, green, pink, gold, cyan, red, tangerine, yellow, lime, teal, sky, indigo, violet, fuchsia, rose, brown, grey, silver, white, black, custom (uses each user's own color picker), or a gradient: aurora, sunset, ocean, fire, candy, forest, twilight, peach, citrus, berry, rosegold, cyberpunk.",
         )
         default_words_interval: float = Field(
             default=2.4,
