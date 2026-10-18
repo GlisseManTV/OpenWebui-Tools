@@ -1,10 +1,10 @@
 """
 title: Message Loading Indicator
 description: Adds Message Loading Indicator and Thinking Indicator settings under Settings > Interface, so each user picks how a reply shows it is loading (Open WebUI's default, blinking cursor, pulsing dot, legacy bars, terminal block, typing dots, equalizer, spinner, shimmer lines, ellipsis, scanner, orbit, ripple, breathing orb, dot grid, flipping square, sparkle, heartbeat or bouncing ball) and which icon sits beside the Thinking header while a model reasons. Published into /static/loader.js through the Shared Assets Protocol, so it coexists with Theme Designer Pro and any other plugin using it.
-author: @G30
-author_url: https://openwebui.com/u/g30
-funding_url: https://buymeacoffee.com/iamg30
-version: 1.2.0
+author: ichrist (based on G30 function)
+author_url: https://openwebui.com/u/ichrist
+funding_url:
+version: 1.3.3
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -454,6 +454,247 @@ NEW_STYLES = [
     "ball",
 ]
 
+
+# ---------------------------------------------------------------------------
+# 1.3.0: 30 more styles. Merged into the dicts above so the generated CSS,
+# both pickers and the valves pick them up automatically.
+# ---------------------------------------------------------------------------
+def _s(n):
+    return "<span></span>" * n
+
+
+MORE_STYLE_NAMES = {
+    "dualring": "Dual Ring",
+    "chase": "Dot Chase",
+    "dna": "DNA Helix",
+    "pendulum": "Pendulum",
+    "cradle": "Newton's Cradle",
+    "progress": "Progress Bar",
+    "stripes": "Barber Pole",
+    "hourglass": "Hourglass",
+    "clock": "Clock",
+    "radar": "Radar",
+    "pulsering": "Pulse Ring",
+    "squares": "Fading Squares",
+    "diamond": "Morphing Diamond",
+    "sine": "Sine Wave",
+    "dotwave": "Dot Wave",
+    "chart": "Bar Chart",
+    "typewriter": "Typewriter",
+    "underscore": "Underscore",
+    "lines": "Rolling Lines",
+    "pacman": "Chomper",
+    "infinity": "Infinity",
+    "triangle": "Triangle Trace",
+    "morph": "Morphing Blob",
+    "dotring": "Dot Ring",
+    "bubbles": "Rising Bubbles",
+    "stairs": "Stairs",
+    "wifi": "Signal",
+    "bolt": "Lightning",
+    "twinkle": "Twinkle",
+    "gradient": "Gradient Ring",
+}
+# Too wide for the small Thinking header icon.
+_WIDE = {"progress", "stripes", "pacman", "typewriter"}
+MORE_DISPLAY = {k: "inline-block" for k in MORE_STYLE_NAMES}
+for _k in ("dna", "dotwave", "chart", "lines", "stairs", "cradle"):
+    MORE_DISPLAY[_k] = "inline-flex"
+MORE_DISPLAY["squares"] = "inline-grid"
+
+
+def _sorted_names(d, first):
+    head = {k: d[k] for k in first if k in d}
+    rest = sorted(
+        ((k, v) for k, v in d.items() if k not in head), key=lambda kv: kv[1].lower()
+    )
+    return {**head, **dict(rest)}
+
+
+STYLE_NAMES.update(MORE_STYLE_NAMES)
+THINK_NAMES.update({k: v for k, v in MORE_STYLE_NAMES.items() if k not in _WIDE})
+DISPLAY.update(MORE_DISPLAY)
+NEW_STYLES.extend(MORE_STYLE_NAMES)
+STYLE_NAMES = _sorted_names(STYLE_NAMES, ("default",))
+THINK_NAMES = _sorted_names(THINK_NAMES, ("default", "none"))
+STYLE_LITERAL = Literal[tuple(STYLE_NAMES)]
+THINK_LITERAL = Literal[tuple(THINK_NAMES)]
+
+MORE_MARKUP = "".join(
+    [
+        '<span class="osk-dualring"></span>',
+        f'<span class="osk-chase">{_s(8)}</span>',
+        f'<span class="osk-dna">{_s(5)}</span>',
+        '<span class="osk-pendulum"><span></span></span>',
+        f'<span class="osk-cradle">{_s(5)}</span>',
+        '<span class="osk-progress"><span></span></span>',
+        '<span class="osk-stripes"></span>',
+        '<span class="osk-hourglass"><svg viewBox="0 0 12 16" aria-hidden="true"><path d="M1 1h10M1 15h10M2 1c0 5 4 5 4 7s-4 2-4 7M10 1c0 5-4 5-4 7s4 2 4 7"/></svg></span>',
+        '<span class="osk-clock"></span>',
+        '<span class="osk-radar"></span>',
+        '<span class="osk-pulsering"></span>',
+        f'<span class="osk-squares">{_s(4)}</span>',
+        '<span class="osk-diamond"></span>',
+        '<span class="osk-sine"><svg viewBox="0 0 32 12" aria-hidden="true"><path pathLength="50" d="M0 6Q4 0 8 6T16 6T24 6T32 6"/></svg></span>',
+        f'<span class="osk-dotwave">{_s(5)}</span>',
+        f'<span class="osk-chart">{_s(4)}</span>',
+        '<span class="osk-typewriter"><span></span></span>',
+        '<span class="osk-underscore"></span>',
+        f'<span class="osk-lines">{_s(3)}</span>',
+        '<span class="osk-pacman"></span>',
+        '<span class="osk-infinity"><svg viewBox="0 0 24 12" aria-hidden="true"><path class="t" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/><path class="a" pathLength="100" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/></svg></span>',
+        '<span class="osk-triangle"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="t" d="M8 2L14.5 13.5H1.5Z"/><path class="a" pathLength="100" d="M8 2L14.5 13.5H1.5Z"/></svg></span>',
+        '<span class="osk-morph"></span>',
+        f'<span class="osk-dotring">{_s(12)}</span>',
+        f'<span class="osk-bubbles">{_s(3)}</span>',
+        f'<span class="osk-stairs">{_s(4)}</span>',
+        '<span class="osk-wifi"><svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1 5Q8 -2 15 5"/><path d="M3.5 7.5Q8 3.5 12.5 7.5"/><path d="M6 10Q8 8.2 10 10"/><circle cx="8" cy="12.5" r="1.2"/></svg></span>',
+        '<span class="osk-bolt"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 0L2 9h5l-1.5 7L14 6.5H9z"/></svg></span>',
+        f'<span class="osk-twinkle">{_s(4)}</span>',
+        '<span class="osk-gradient"></span>',
+    ]
+)
+
+
+def _ring_css(cls, n, r, d, dur, anim):
+    h = d / 2
+    out = [
+        f".osk-{cls}{{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom}}",
+        f".osk-{cls}>span{{position:absolute;left:50%;top:50%;width:{d:g}px;height:{d:g}px;margin:-{h:g}px 0 0 -{h:g}px;border-radius:9999px;background:var(--osk-m);animation:{anim} {dur:g}s linear infinite}}",
+    ]
+    for i in range(n):
+        out.append(
+            f".osk-{cls}>span:nth-child({i + 1}){{transform:rotate({i * 360 / n:g}deg) translateY(-{r:g}px);animation-delay:-{dur * i / n:.3f}s}}"
+        )
+    return "\n".join(out)
+
+
+MORE_CSS_STATIC = r"""
+.osk-dualring{position:relative;box-sizing:border-box;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;border:2px solid transparent;border-top-color:var(--osk-m);border-bottom-color:var(--osk-m);border-radius:9999px;animation:osk-spin 1s linear infinite}
+.osk-dualring::after{content:"";position:absolute;top:1px;right:1px;bottom:1px;left:1px;border:2px solid transparent;border-left-color:var(--osk-s);border-right-color:var(--osk-s);border-radius:9999px;animation:osk-spin .7s linear infinite reverse}
+.osk-dna{align-items:center;gap:3px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-dna>span{display:block;width:3px;height:3px;border-radius:9999px;background:var(--osk-m);animation:osk-dna 1.2s ease-in-out infinite}
+.osk-dna>span:nth-child(even){background:var(--osk-s)}
+.osk-dna>span:nth-child(2){animation-delay:-.15s}
+.osk-dna>span:nth-child(3){animation-delay:-.3s}
+.osk-dna>span:nth-child(4){animation-delay:-.45s}
+.osk-dna>span:nth-child(5){animation-delay:-.6s}
+.osk-pendulum{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-pendulum>span{position:absolute;top:0;left:50%;width:1.5px;height:11px;margin-left:-.75px;background:var(--osk-m);transform-origin:50% 0;animation:osk-swing 1s ease-in-out infinite alternate}
+.osk-pendulum>span::after{content:"";position:absolute;left:-2.25px;bottom:-4px;width:6px;height:6px;border-radius:9999px;background:var(--osk-m)}
+.osk-cradle{align-items:center;height:14px;margin:0 8px;vertical-align:text-bottom}
+.osk-cradle>span{display:block;width:5px;height:5px;border-radius:9999px;background:var(--osk-m)}
+.osk-cradle>span:first-child{animation:osk-cla 1.2s ease-in-out infinite}
+.osk-cradle>span:last-child{animation:osk-clb 1.2s ease-in-out infinite}
+.osk-progress{position:relative;width:48px;height:4px;margin-left:4px;vertical-align:middle;overflow:hidden;border-radius:2px;background:var(--osk-t)}
+.osk-progress>span{position:absolute;top:0;left:0;height:100%;border-radius:2px;background:var(--osk-m);animation:osk-prog 1.6s ease-in-out infinite}
+.osk-stripes{width:44px;height:6px;margin-left:4px;vertical-align:middle;border-radius:3px;background:repeating-linear-gradient(45deg,var(--osk-m) 0 4px,var(--osk-t) 4px 8px);background-size:11.314px 11.314px;animation:osk-stripe .6s linear infinite}
+.osk-hourglass{width:10px;height:14px;margin:0 4px;vertical-align:text-bottom;color:var(--osk-m);animation:osk-hg 2s ease-in-out infinite}
+.osk-hourglass>svg{display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round}
+.osk-clock{position:relative;box-sizing:border-box;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;border:1.5px solid var(--osk-m);border-radius:9999px}
+.osk-clock::before,.osk-clock::after{content:"";position:absolute;left:50%;bottom:50%;width:1.5px;margin-left:-.75px;border-radius:1px;background:var(--osk-m);transform-origin:50% 100%}
+.osk-clock::before{height:5px;animation:osk-spin 1s linear infinite}
+.osk-clock::after{height:3.5px;animation:osk-spin 12s linear infinite}
+.osk-radar{box-sizing:border-box;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;border:1.5px solid var(--osk-m);border-radius:9999px;background:conic-gradient(from 0deg,transparent 0 250deg,color-mix(in oklab,var(--osk-m) 75%,transparent) 360deg);animation:osk-spin 1.4s linear infinite}
+.osk-pulsering{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-pulsering::before{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:9999px;background:var(--osk-s);animation:osk-breathe 1.2s ease-in-out infinite}
+.osk-pulsering::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-sizing:border-box;border:2px solid var(--osk-m);border-radius:9999px;opacity:0;animation:osk-ripple 1.2s ease-out infinite}
+.osk-squares{grid-template-columns:repeat(2,5px);gap:2px;margin-left:4px;vertical-align:text-bottom}
+.osk-squares>span{display:block;width:5px;height:5px;border-radius:1px;background:var(--osk-m);animation:osk-sq 1.2s ease-in-out infinite}
+.osk-squares>span:nth-child(2){animation-delay:.15s}
+.osk-squares>span:nth-child(4){animation-delay:.3s}
+.osk-squares>span:nth-child(3){animation-delay:.45s}
+.osk-diamond{width:9px;height:9px;margin:0 5px;vertical-align:middle;background:var(--osk-m);animation:osk-dia 1.6s ease-in-out infinite}
+.osk-sine{width:28px;height:12px;margin-left:4px;vertical-align:text-bottom;color:var(--osk-m)}
+.osk-sine>svg{display:block;width:100%;height:100%;overflow:visible}
+.osk-sine path{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-dasharray:50;stroke-dashoffset:50;animation:osk-ecg 1.6s linear infinite}
+.osk-dotwave{align-items:center;gap:3px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-dotwave>span{display:block;width:4px;height:4px;border-radius:9999px;background:var(--osk-m);animation:osk-dw 1s ease-in-out infinite}
+.osk-dotwave>span:nth-child(2){animation-delay:-.12s}
+.osk-dotwave>span:nth-child(3){animation-delay:-.24s}
+.osk-dotwave>span:nth-child(4){animation-delay:-.36s}
+.osk-dotwave>span:nth-child(5){animation-delay:-.48s}
+.osk-chart{align-items:flex-end;gap:2px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-chart>span{display:block;width:3px;height:100%;border-radius:1px;background:var(--osk-m);transform-origin:50% 100%;animation:osk-bar 1.4s ease-in-out infinite}
+.osk-chart>span:nth-child(2){animation-delay:-.35s}
+.osk-chart>span:nth-child(3){animation-delay:-.7s}
+.osk-chart>span:nth-child(4){animation-delay:-1.05s}
+.osk-typewriter{width:48px;height:12px;margin-left:4px;vertical-align:text-bottom}
+.osk-typewriter>span{display:block;width:0;height:100%;box-sizing:border-box;border-right:2px solid var(--osk-s);background:repeating-linear-gradient(90deg,var(--osk-m) 0 4px,transparent 4px 6px) 0 50%/100% 3px no-repeat;animation:osk-type 2s steps(8) infinite}
+.osk-underscore{width:8px;height:2px;margin-left:3px;vertical-align:baseline;background:var(--osk-m);animation:osk-blink 1s steps(1,end) infinite}
+.osk-lines{flex-direction:column;justify-content:center;gap:3px;width:22px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-lines>span{display:block;height:2px;border-radius:1px;background:var(--osk-m);transform-origin:0 50%;animation:osk-roll 1.4s ease-in-out infinite}
+.osk-lines>span:nth-child(2){animation-delay:-.25s}
+.osk-lines>span:nth-child(3){animation-delay:-.5s}
+.osk-pacman{position:relative;width:40px;height:14px;margin-left:4px;vertical-align:text-bottom;overflow:hidden}
+.osk-pacman::before{content:"";position:absolute;left:0;top:0;width:14px;height:14px;border-radius:9999px;background:var(--osk-m);animation:osk-chomp .5s ease-in-out infinite alternate}
+.osk-pacman::after{content:"";position:absolute;top:50%;left:18px;width:calc(100% + 8px);height:3px;margin-top:-1.5px;background:radial-gradient(circle,var(--osk-m) 1.4px,transparent 1.6px) 0 0/8px 3px repeat-x;animation:osk-dots .5s linear infinite}
+.osk-infinity{width:24px;height:12px;margin-left:4px;vertical-align:text-bottom;color:var(--osk-m)}
+.osk-triangle{width:16px;height:16px;margin:0 3px;vertical-align:text-bottom;color:var(--osk-m)}
+.osk-infinity>svg,.osk-triangle>svg{display:block;width:100%;height:100%;overflow:visible}
+.osk-infinity path,.osk-triangle path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.osk-infinity .t,.osk-triangle .t{opacity:.25}
+.osk-infinity .a,.osk-triangle .a{stroke-dasharray:30 70;animation:osk-dash 1.4s linear infinite}
+.osk-morph{width:12px;height:12px;margin:0 5px;vertical-align:middle;background:var(--osk-m);border-radius:60% 40% 30% 70%/60% 30% 70% 40%;animation:osk-morph 2.4s ease-in-out infinite}
+.osk-bubbles{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-bubbles>span{position:absolute;bottom:0;box-sizing:border-box;border:1.5px solid var(--osk-m);border-radius:9999px;opacity:0;animation:osk-rise 1.8s ease-in infinite}
+.osk-bubbles>span:nth-child(1){left:1px;width:5px;height:5px}
+.osk-bubbles>span:nth-child(2){left:6px;width:4px;height:4px;animation-delay:.6s}
+.osk-bubbles>span:nth-child(3){left:10px;width:5px;height:5px;animation-delay:1.2s}
+.osk-stairs{align-items:flex-end;gap:2px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-stairs>span{display:block;width:3px;border-radius:1px;background:var(--osk-m);animation:osk-seq 1.2s ease-in-out infinite}
+.osk-stairs>span:nth-child(1){height:4px}
+.osk-stairs>span:nth-child(2){height:7px;animation-delay:.15s}
+.osk-stairs>span:nth-child(3){height:10px;animation-delay:.3s}
+.osk-stairs>span:nth-child(4){height:14px;animation-delay:.45s}
+.osk-wifi{width:16px;height:14px;margin:0 3px;vertical-align:text-bottom;color:var(--osk-m)}
+.osk-wifi>svg{display:block;width:100%;height:100%;overflow:visible}
+.osk-wifi path{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;animation:osk-seq 1.4s ease-in-out infinite}
+.osk-wifi path:nth-child(1){animation-delay:.4s}
+.osk-wifi path:nth-child(2){animation-delay:.2s}
+.osk-wifi circle{fill:currentColor}
+.osk-bolt{width:14px;height:14px;margin:0 3px;vertical-align:text-bottom;color:var(--osk-m);animation:osk-bolt 1.4s linear infinite}
+.osk-bolt>svg{display:block;width:100%;height:100%}
+.osk-twinkle{position:relative;width:18px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-twinkle>span{position:absolute;background:var(--osk-m);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:osk-tw 1.4s ease-in-out infinite}
+.osk-twinkle>span:nth-child(1){left:1px;top:8px;width:5px;height:5px}
+.osk-twinkle>span:nth-child(2){left:7px;top:0;width:6px;height:6px;animation-delay:.35s}
+.osk-twinkle>span:nth-child(3){left:13px;top:8px;width:4px;height:4px;animation-delay:.7s}
+.osk-twinkle>span:nth-child(4){left:6px;top:10px;width:4px;height:4px;animation-delay:1.05s}
+.osk-gradient{width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;border-radius:9999px;background:conic-gradient(from 0deg,transparent,var(--osk-s));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));animation:osk-spin .9s linear infinite}
+@keyframes osk-fade{0%{opacity:1}100%{opacity:.15}}
+@keyframes osk-tail{0%{opacity:1}50%,100%{opacity:.15}}
+@keyframes osk-dna{0%,100%{transform:translateY(-5px) scale(.7)}50%{transform:translateY(5px) scale(1.2)}}
+@keyframes osk-swing{from{transform:rotate(-35deg)}to{transform:rotate(35deg)}}
+@keyframes osk-cla{0%,100%{transform:translateX(-6px)}25%,75%{transform:translateX(0)}}
+@keyframes osk-clb{0%,25%,75%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes osk-prog{0%{left:0;width:0}50%{left:0;width:75%}100%{left:100%;width:0}}
+@keyframes osk-stripe{to{background-position:11.314px 0}}
+@keyframes osk-hg{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(180deg)}}
+@keyframes osk-sq{0%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+@keyframes osk-dia{0%,100%{transform:rotate(45deg);border-radius:1px}50%{transform:rotate(225deg) scale(.8);border-radius:50%}}
+@keyframes osk-dw{0%,100%{transform:translateY(3px)}50%{transform:translateY(-3px)}}
+@keyframes osk-bar{0%,100%{transform:scaleY(.25)}25%{transform:scaleY(1)}50%{transform:scaleY(.5)}75%{transform:scaleY(.8)}}
+@keyframes osk-type{0%{width:0}75%,100%{width:100%}}
+@keyframes osk-roll{0%,100%{transform:scaleX(.3)}50%{transform:scaleX(1)}}
+@keyframes osk-chomp{from{clip-path:polygon(0 0,100% 0,100% 20%,50% 50%,100% 80%,100% 100%,0 100%)}to{clip-path:polygon(0 0,100% 0,100% 49%,50% 50%,100% 51%,100% 100%,0 100%)}}
+@keyframes osk-dots{to{transform:translateX(-8px)}}
+@keyframes osk-dash{to{stroke-dashoffset:-100}}
+@keyframes osk-morph{0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%;transform:rotate(0)}50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%;transform:rotate(180deg)}}
+@keyframes osk-rise{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:1}100%{transform:translateY(-13px) scale(1);opacity:0}}
+@keyframes osk-bolt{0%,100%{opacity:.25;transform:scale(.85)}10%{opacity:1;transform:scale(1.1)}20%{opacity:.4}30%{opacity:1}60%{opacity:.25}}
+@keyframes osk-tw{0%,100%{transform:scale(.3);opacity:.2}50%{transform:scale(1);opacity:1}}
+"""
+
+MORE_CSS = "\n".join(
+    [
+        MORE_CSS_STATIC.strip(),
+        _ring_css("chase", 8, 6, 3, 0.9, "osk-tail"),
+        _ring_css("dotring", 12, 6.5, 2.2, 1.2, "osk-fade"),
+    ]
+)
+
+
 OSK_CSS_BASE = r"""
 .osk,.osk>span{display:none}
 html[data-osk="bars"] #response-content-container>div:not(:first-child) .osk-host[data-osk-kind="cursor"],
@@ -643,7 +884,9 @@ def _build_generated_css() -> str:
     return "\n".join(rules)
 
 
-OSK_CSS = "\n".join([OSK_CSS_BASE.strip(), OSK_CSS_NEW.strip(), _build_generated_css()])
+OSK_CSS = "\n".join(
+    [OSK_CSS_BASE.strip(), OSK_CSS_NEW.strip(), MORE_CSS, _build_generated_css()]
+)
 
 LOADER_SCRIPT = r"""
 (function () {
@@ -679,7 +922,8 @@ LOADER_SCRIPT = r"""
     '<span class="osk-flip"></span>' +
     '<span class="osk-sparkle"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c.6 6.6 4.8 11.4 12 12-7.2.6-11.4 5.4-12 12C11.4 17.4 6.6 12.6 0 12 6.6 11.4 11.4 6.6 12 0z"/></svg></span>' +
     '<span class="osk-heartbeat"><svg viewBox="0 0 28 14" aria-hidden="true"><path pathLength="50" d="M0 7h7l2-4 3 8 2-10 3 8 2-2h9"/></svg></span>' +
-    '<span class="osk-ball"><span></span></span>';
+    '<span class="osk-ball"><span></span></span>' +
+    __MORE_MARKUP__;
   var CHEVRON =
     '<svg class="osk-chev" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">' +
     '<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>';
@@ -909,6 +1153,7 @@ LOADER_SCRIPT = r"""
     attr: 'data-osk',
     names: CFG.names,
     fallback: CFG.fallback,
+    defaultPreview: 'dotring',
     title: 'Message Loading Indicator',
     note: 'How a reply shows that it is still loading. Saved in this browser.',
     place: function () {
@@ -932,7 +1177,7 @@ LOADER_SCRIPT = r"""
     attr: 'data-osk-think',
     names: CFG.thinkNames,
     fallback: CFG.thinkFallback,
-    defaultPreview: 'spinner',
+    defaultPreview: 'dotring',
     title: 'Thinking Indicator',
     note: 'The icon beside the Thinking header while a model reasons. Saved in this browser.',
     place: function () {
@@ -1033,49 +1278,11 @@ LOADER_SCRIPT = r"""
 
 class Event:
     class Valves(BaseModel):
-        default_style: Literal[
-            "default",
-            "cursor",
-            "dot",
-            "bars",
-            "block",
-            "typing",
-            "wave",
-            "spinner",
-            "shimmer",
-            "ellipsis",
-            "scanner",
-            "orbit",
-            "ripple",
-            "breathe",
-            "grid",
-            "flip",
-            "sparkle",
-            "heartbeat",
-            "ball",
-        ] = Field(
+        default_style: STYLE_LITERAL = Field(
             default="default",
             description="What Default means in the Message Loading Indicator setting for users who have not picked a style. 'default' keeps Open WebUI's own indicator. Others: cursor, dot, bars (legacy loading bars), block (terminal block cursor), typing, wave (equalizer), spinner, shimmer (skeleton lines), ellipsis, scanner, orbit, ripple, breathe (breathing orb), grid (dot grid), flip (flipping square), sparkle, heartbeat, ball (bouncing ball).",
         )
-        default_thinking_style: Literal[
-            "default",
-            "none",
-            "spinner",
-            "dot",
-            "block",
-            "typing",
-            "wave",
-            "ellipsis",
-            "scanner",
-            "orbit",
-            "ripple",
-            "breathe",
-            "grid",
-            "flip",
-            "sparkle",
-            "heartbeat",
-            "ball",
-        ] = Field(
+        default_thinking_style: THINK_LITERAL = Field(
             default="default",
             description="What Default means in the Thinking Indicator setting, the icon beside the Thinking header while a model reasons. 'default' keeps Open WebUI's own spinner and 'none' hides the icon. The other values match the message styles of the same name.",
         )
@@ -1110,6 +1317,7 @@ class Event:
             LOADER_SCRIPT.strip()
             .replace("__CONFIG__", config)
             .replace("__CSS__", _json.dumps(OSK_CSS.strip()))
+            .replace("__MORE_MARKUP__", _json.dumps(MORE_MARKUP))
         )
         fragment = f"{self.LOADER_BLOCK_START}\n{js}\n{self.LOADER_BLOCK_END}"
         Event._fragment_cache = (cache_key, fragment)
