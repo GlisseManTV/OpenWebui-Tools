@@ -1602,6 +1602,7 @@ TW_GRADIENTS = {
 TW_COLORS.update(TW_GRADIENTS)
 TW_COLOR_NAMES = {
     "default": "Default",
+    "custom": "Custom (pick any color)",
     "random": "Random (changes every phrase)",
     "theme": "Match Theme",
     "orange": "Claude Orange",
@@ -1626,7 +1627,6 @@ TW_COLOR_NAMES = {
     "silver": "Silver",
     "white": "White",
     "black": "Black",
-    "custom": "Custom (pick any color)",
     "aurora": "Aurora (gradient)",
     "sunset": "Sunset (gradient)",
     "ocean": "Ocean (gradient)",
