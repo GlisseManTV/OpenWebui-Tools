@@ -940,8 +940,11 @@ Any prompt where you'd normally need 3 rounds of re-prompting
 <summary><h2>⏳ Message Loading Indicator + Thinking Studio</h2>
 <blockquote>Make every reply feel alive. Pick from 100 animated loading styles, swap the icon beside the Thinking header, and replace the bland "Thinking…" label with rotating Claude-style phrases — animated, colored, styled and timed exactly how you like. All from a new set of settings under <b>Settings → Interface</b>.</blockquote>
 
-[![Install on Open WebUI](https://img.shields.io/badge/⬇️_Install-Open_WebUI_Marketplace-06b6d4?style=for-the-badge&labelColor=0e7490)](https://openwebui.com/u/ichrist)
+[![Install on Open WebUI](https://img.shields.io/badge/⬇️_Install-Open_WebUI_Marketplace-06b6d4?style=for-the-badge&labelColor=0e7490)](https://openwebui.com/posts/indicator_changer_a2baaf4f)
 </summary>
+
+<img width="1761" height="670" alt="Screenshot 2026-10-18 172232" src="https://github.com/user-attachments/assets/ffcc0ea3-1a9c-41d4-a3dc-f156be1da90c" />
+
 
 > 🧩 **This one is a Function, not a Tool.** Install it under **Admin Panel → Functions** and switch it on once — there is nothing to toggle per chat. Requires **Open WebUI 0.11.0+**. Adapted from the G30 function.
 
