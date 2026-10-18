@@ -1,10 +1,10 @@
 """
 title: Message Loading Indicator
-description: Adds Message Loading Indicator and Thinking Indicator settings under Settings > Interface, so each user picks how a reply shows it is loading (Open WebUI's default, blinking cursor, pulsing dot, legacy bars, terminal block, typing dots, equalizer, spinner, shimmer lines, ellipsis, scanner, orbit, ripple, breathing orb, dot grid, flipping square, sparkle, heartbeat or bouncing ball) and which icon sits beside the Thinking header while a model reasons. Published into /static/loader.js through the Shared Assets Protocol, so it coexists with Theme Designer Pro and any other plugin using it.
+description: Message Loading Indicator + Thinking Studio. Adds settings under Settings > Interface so each user picks how a reply shows it is loading (100 styles plus a Random option), which icon sits beside the Thinking header, and replaces the bland 'Thinking...' text with rotating thinking words (Claude-style, dev, playful, hacker, zen, Hebrew, custom...) with animated effects, fonts, colors, speed and an optional live timer. Published into /static/loader.js through the Shared Assets Protocol, so it coexists with Theme Designer Pro and any other plugin using it.
 author: ichrist (adapted from G30 function)
 author_url: https://openwebui.com/u/ichrist
 funding_url:
-version: 1.4.0
+version: 2.2.2
 license: MIT
 required_open_webui_version: 0.11.0
 """
@@ -454,6 +454,7 @@ NEW_STYLES = [
     "ball",
 ]
 
+
 # ---------------------------------------------------------------------------
 # 1.3.0: 30 more styles. Merged into the dicts above so the generated CSS,
 # both pickers and the valves pick them up automatically.
@@ -463,91 +464,246 @@ def _s(n):
 
 
 MORE_STYLE_NAMES = {
-    "dualring": "Dual Ring", "chase": "Dot Chase", "dna": "DNA Helix",
-    "pendulum": "Pendulum", "cradle": "Newton's Cradle", "progress": "Progress Bar",
-    "stripes": "Barber Pole", "hourglass": "Hourglass", "clock": "Clock",
-    "radar": "Radar", "pulsering": "Pulse Ring", "squares": "Fading Squares",
-    "diamond": "Morphing Diamond", "sine": "Sine Wave", "dotwave": "Dot Wave",
-    "chart": "Bar Chart", "typewriter": "Typewriter", "underscore": "Underscore",
-    "lines": "Rolling Lines", "pacman": "Chomper", "infinity": "Infinity",
-    "triangle": "Triangle Trace", "morph": "Morphing Blob", "dotring": "Dot Ring",
-    "bubbles": "Rising Bubbles", "stairs": "Stairs", "wifi": "Signal",
-    "bolt": "Lightning", "twinkle": "Twinkle", "gradient": "Gradient Ring",
+    "dualring": "Dual Ring",
+    "chase": "Dot Chase",
+    "dna": "DNA Helix",
+    "pendulum": "Pendulum",
+    "cradle": "Newton's Cradle",
+    "progress": "Progress Bar",
+    "stripes": "Barber Pole",
+    "hourglass": "Hourglass",
+    "clock": "Clock",
+    "radar": "Radar",
+    "pulsering": "Pulse Ring",
+    "squares": "Fading Squares",
+    "diamond": "Morphing Diamond",
+    "sine": "Sine Wave",
+    "dotwave": "Dot Wave",
+    "chart": "Bar Chart",
+    "typewriter": "Typewriter",
+    "underscore": "Underscore",
+    "lines": "Rolling Lines",
+    "pacman": "Chomper",
+    "infinity": "Infinity",
+    "triangle": "Triangle Trace",
+    "morph": "Morphing Blob",
+    "dotring": "Dot Ring",
+    "bubbles": "Rising Bubbles",
+    "stairs": "Stairs",
+    "wifi": "Signal",
+    "bolt": "Lightning",
+    "twinkle": "Twinkle",
+    "gradient": "Gradient Ring",
 }
 # ---- 1.4.0: 40 more styles (merged into MORE_STYLE_NAMES below) ----
 EXTRA_STYLE_NAMES = {
-    "spiral": "Spiral", "target": "Target", "squarejump": "Jumping Squares",
-    "seesaw": "Seesaw", "propeller": "Propeller", "cog": "Cog",
-    "dotted": "Dotted Circle", "ios": "iOS Spinner", "comet": "Comet",
-    "marquee": "Marquee", "flame": "Flame", "drop": "Water Drop",
-    "rain": "Rain", "fill": "Fill Up", "battery": "Battery",
-    "moon": "Moon Phase", "sun": "Sun", "heart": "Heart Beat",
-    "star": "Star Pulse", "spectrum": "Spectrum", "bars3": "Triple Bars",
-    "swap": "Swap Dots", "trio": "Trio Orbit", "satellite": "Satellite",
-    "atom": "Atom", "binary": "Binary", "segments": "Segmented Bar",
-    "zigzag": "Zigzag", "squaretrace": "Square Trace", "hexagon": "Hexagon Trace",
-    "pingpong": "Ping Pong", "traffic": "Traffic Light", "search": "Search",
-    "matrix": "Dot Matrix", "rotsq": "Turning Square", "quad": "Quad Spin",
-    "knight": "Knight Rider", "thought": "Thought Bubble", "diamonds": "Diamond Chain",
+    "spiral": "Spiral",
+    "target": "Target",
+    "squarejump": "Jumping Squares",
+    "seesaw": "Seesaw",
+    "propeller": "Propeller",
+    "cog": "Cog",
+    "dotted": "Dotted Circle",
+    "ios": "iOS Spinner",
+    "comet": "Comet",
+    "marquee": "Marquee",
+    "flame": "Flame",
+    "drop": "Water Drop",
+    "rain": "Rain",
+    "fill": "Fill Up",
+    "battery": "Battery",
+    "moon": "Moon Phase",
+    "sun": "Sun",
+    "heart": "Heart Beat",
+    "star": "Star Pulse",
+    "spectrum": "Spectrum",
+    "bars3": "Triple Bars",
+    "swap": "Swap Dots",
+    "trio": "Trio Orbit",
+    "satellite": "Satellite",
+    "atom": "Atom",
+    "binary": "Binary",
+    "segments": "Segmented Bar",
+    "zigzag": "Zigzag",
+    "squaretrace": "Square Trace",
+    "hexagon": "Hexagon Trace",
+    "pingpong": "Ping Pong",
+    "traffic": "Traffic Light",
+    "search": "Search",
+    "matrix": "Dot Matrix",
+    "rotsq": "Turning Square",
+    "quad": "Quad Spin",
+    "knight": "Knight Rider",
+    "thought": "Thought Bubble",
+    "diamonds": "Diamond Chain",
     "snow": "Snowfall",
 }
 MORE_STYLE_NAMES.update(EXTRA_STYLE_NAMES)
+
+# ---- 2.1.0: 12 more styles (total 100) ----
+V2_STYLE_NAMES = {
+    "gyro": "Gyroscope",
+    "domino": "Domino Fall",
+    "cube": "Cube Spin",
+    "blink": "Blinking Eye",
+    "metronome": "Metronome",
+    "brackets": "Brackets",
+    "zipper": "Zipper",
+    "firefly": "Fireflies",
+    "plus": "Spinning Plus",
+    "compass": "Compass",
+    "ringpop": "Ring Pop",
+    "pulsesq": "Pulse Squares",
+}
+MORE_STYLE_NAMES.update(V2_STYLE_NAMES)
+V2_MARKUP = "".join(
+    [
+        '<span class="osk-gyro"><span></span><span></span></span>',
+        f'<span class="osk-domino">{_s(4)}</span>',
+        '<span class="osk-cube"></span>',
+        '<span class="osk-blink"></span>',
+        '<span class="osk-metronome"><span></span></span>',
+        '<span class="osk-brackets"><span></span><span></span></span>',
+        f'<span class="osk-zipper">{_s(4)}</span>',
+        f'<span class="osk-firefly">{_s(3)}</span>',
+        '<span class="osk-plus"></span>',
+        '<span class="osk-compass"><span></span></span>',
+        '<span class="osk-ringpop"><span></span><span></span></span>',
+        f'<span class="osk-pulsesq">{_s(3)}</span>',
+    ]
+)
+V2_CSS = r"""
+.osk-gyro{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;perspective:60px}
+.osk-gyro>span{position:absolute;inset:0;box-sizing:border-box;border:1.5px solid var(--osk-m);border-radius:9999px}
+.osk-gyro>span:nth-child(1){animation:osk-gyro-x 1.6s linear infinite}
+.osk-gyro>span:nth-child(2){opacity:.6;animation:osk-gyro-y 1.6s linear infinite}
+@keyframes osk-gyro-x{to{transform:rotateX(360deg)}}
+@keyframes osk-gyro-y{to{transform:rotateY(360deg)}}
+.osk-domino{align-items:flex-end;gap:2px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-domino>span{width:3px;height:12px;border-radius:1px;background:var(--osk-m);transform-origin:bottom center;animation:osk-domino 1.4s ease-in-out infinite}
+.osk-domino>span:nth-child(2){animation-delay:.12s}
+.osk-domino>span:nth-child(3){animation-delay:.24s}
+.osk-domino>span:nth-child(4){animation-delay:.36s}
+@keyframes osk-domino{0%,25%{transform:rotate(0)}50%,75%{transform:rotate(62deg)}100%{transform:rotate(0)}}
+.osk-cube{width:12px;height:12px;margin-left:4px;vertical-align:text-bottom;border-radius:2px;background:var(--osk-m);animation:osk-cube 1.4s ease-in-out infinite}
+@keyframes osk-cube{0%{transform:perspective(40px) rotateY(0)}50%{transform:perspective(40px) rotateY(180deg)}100%{transform:perspective(40px) rotateY(360deg)}}
+.osk-blink{position:relative;box-sizing:border-box;width:16px;height:10px;margin-left:4px;vertical-align:middle;border:1.5px solid var(--osk-m);border-radius:50%;animation:osk-blink 2.2s ease-in-out infinite}
+.osk-blink::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--osk-m)}
+@keyframes osk-blink{0%,40%,50%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}}
+.osk-metronome{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-metronome>span{position:absolute;left:50%;bottom:1px;width:2px;height:14px;margin-left:-1px;border-radius:1px;background:var(--osk-m);transform-origin:bottom center;animation:osk-metro 1s ease-in-out infinite alternate}
+.osk-metronome>span::after{content:'';position:absolute;left:-2px;top:0;width:6px;height:4px;border-radius:2px;background:var(--osk-m)}
+@keyframes osk-metro{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
+.osk-brackets{position:relative;width:16px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-brackets>span{position:absolute;top:0;bottom:0;box-sizing:border-box;width:5px;border:2px solid var(--osk-m)}
+.osk-brackets>span:nth-child(1){left:0;border-right:0;border-radius:2px 0 0 2px;animation:osk-brk 1.2s ease-in-out infinite alternate}
+.osk-brackets>span:nth-child(2){right:0;border-left:0;border-radius:0 2px 2px 0;animation:osk-brk2 1.2s ease-in-out infinite alternate}
+@keyframes osk-brk{to{transform:translateX(3px)}}
+@keyframes osk-brk2{to{transform:translateX(-3px)}}
+.osk-zipper{position:relative;width:22px;height:12px;margin-left:4px;vertical-align:text-bottom}
+.osk-zipper>span{position:absolute;top:4px;width:3px;height:3px;border-radius:9999px;background:var(--osk-m);animation:osk-zip 1s ease-in-out infinite}
+.osk-zipper>span:nth-child(1){left:0}
+.osk-zipper>span:nth-child(2){left:6px;animation-delay:-.5s}
+.osk-zipper>span:nth-child(3){left:12px}
+.osk-zipper>span:nth-child(4){left:18px;animation-delay:-.5s}
+@keyframes osk-zip{0%,100%{transform:translateY(-3px)}50%{transform:translateY(3px)}}
+.osk-firefly{position:relative;width:18px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-firefly>span{position:absolute;width:3px;height:3px;border-radius:9999px;background:var(--osk-m);box-shadow:0 0 5px var(--osk-m);animation:osk-ff 2.4s ease-in-out infinite}
+.osk-firefly>span:nth-child(1){left:2px;top:9px}
+.osk-firefly>span:nth-child(2){left:8px;top:3px;animation-delay:-.8s;animation-duration:2.9s}
+.osk-firefly>span:nth-child(3){left:14px;top:10px;animation-delay:-1.6s;animation-duration:2.1s}
+@keyframes osk-ff{0%,100%{opacity:.15;transform:translate(0,0)}50%{opacity:1;transform:translate(2px,-3px)}}
+.osk-plus{position:relative;width:14px;height:14px;margin-left:4px;vertical-align:text-bottom;animation:osk-plus 1.4s ease-in-out infinite}
+.osk-plus::before,.osk-plus::after{content:'';position:absolute;border-radius:1px;background:var(--osk-m)}
+.osk-plus::before{left:0;right:0;top:6px;height:2px}
+.osk-plus::after{top:0;bottom:0;left:6px;width:2px}
+@keyframes osk-plus{0%{transform:rotate(0) scale(1)}50%{transform:rotate(90deg) scale(.7)}100%{transform:rotate(180deg) scale(1)}}
+.osk-compass{position:relative;box-sizing:border-box;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;border:1.5px solid var(--osk-m);border-radius:50%}
+.osk-compass>span{position:absolute;left:50%;top:50%;width:2px;height:8px;margin:-4px 0 0 -1px;border-radius:1px;background:var(--osk-m);animation:osk-compass 2s ease-in-out infinite}
+@keyframes osk-compass{0%,100%{transform:rotate(-40deg)}50%{transform:rotate(60deg)}}
+.osk-ringpop{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom}
+.osk-ringpop>span:nth-child(1){position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--osk-m)}
+.osk-ringpop>span:nth-child(2){position:absolute;inset:0;box-sizing:border-box;border:1.5px solid var(--osk-m);border-radius:50%;animation:osk-rp 1.3s ease-out infinite}
+@keyframes osk-rp{0%{transform:scale(.25);opacity:1}100%{transform:scale(1);opacity:0}}
+.osk-pulsesq{align-items:center;gap:3px;height:14px;margin-left:4px;vertical-align:text-bottom}
+.osk-pulsesq>span{width:4px;height:4px;background:var(--osk-m);animation:osk-psq 1s ease-in-out infinite}
+.osk-pulsesq>span:nth-child(2){animation-delay:.15s}
+.osk-pulsesq>span:nth-child(3){animation-delay:.3s}
+@keyframes osk-psq{0%,100%{transform:scale(.6);opacity:.5}50%{transform:scale(1.6);opacity:1}}
+"""
+
 EXTRA_WIDE = {"segments", "pingpong", "knight"}
-EXTRA_DISPLAY = {k: "inline-flex" for k in (
-    "squarejump", "rain", "spectrum", "bars3", "binary", "segments",
-    "traffic", "thought", "diamonds", "snow")}
+EXTRA_DISPLAY = {
+    k: "inline-flex"
+    for k in (
+        "squarejump",
+        "rain",
+        "spectrum",
+        "bars3",
+        "binary",
+        "segments",
+        "traffic",
+        "thought",
+        "diamonds",
+        "snow",
+    )
+}
 EXTRA_DISPLAY.update({"matrix": "inline-grid", "quad": "inline-grid"})
 
 _TRACE = 'd="{d}"'
 
 
 def _trace(cls, vb, d):
-    return (f'<span class="osk-{cls}"><svg viewBox="{vb}" aria-hidden="true">'
-            f'<path class="t" d="{d}"/><path class="a" pathLength="100" d="{d}"/></svg></span>')
+    return (
+        f'<span class="osk-{cls}"><svg viewBox="{vb}" aria-hidden="true">'
+        f'<path class="t" d="{d}"/><path class="a" pathLength="100" d="{d}"/></svg></span>'
+    )
 
 
-EXTRA_MARKUP = "".join([
-    f'<span class="osk-spiral">{_s(8)}</span>',
-    '<span class="osk-target"></span>',
-    f'<span class="osk-squarejump">{_s(3)}</span>',
-    '<span class="osk-seesaw"></span>',
-    '<span class="osk-propeller"></span>',
-    '<span class="osk-cog"></span>',
-    '<span class="osk-dotted"></span>',
-    f'<span class="osk-ios">{_s(12)}</span>',
-    f'<span class="osk-comet">{_s(6)}</span>',
-    '<span class="osk-marquee"></span>',
-    '<span class="osk-flame"></span>',
-    '<span class="osk-drop"></span>',
-    f'<span class="osk-rain">{_s(5)}</span>',
-    '<span class="osk-fill"></span>',
-    '<span class="osk-battery"><span></span></span>',
-    '<span class="osk-moon"></span>',
-    f'<span class="osk-sun">{_s(8)}</span>',
-    '<span class="osk-heart"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg></span>',
-    '<span class="osk-star"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7.1L12 17.6 5.7 21.3l1.7-7.1L2 9.5l7.1-.6z"/></svg></span>',
-    f'<span class="osk-spectrum">{_s(7)}</span>',
-    f'<span class="osk-bars3">{_s(3)}</span>',
-    f'<span class="osk-swap">{_s(2)}</span>',
-    f'<span class="osk-trio">{_s(3)}</span>',
-    '<span class="osk-satellite"><span></span></span>',
-    f'<span class="osk-atom">{_s(3)}</span>',
-    f'<span class="osk-binary">{_s(5)}</span>',
-    f'<span class="osk-segments">{_s(6)}</span>',
-    '<span class="osk-zigzag"><svg viewBox="0 0 24 12" aria-hidden="true"><path pathLength="50" d="M0 10L4 2L8 10L12 2L16 10L20 2L24 10"/></svg></span>',
-    _trace("squaretrace", "0 0 16 16", "M2.5 2.5H13.5V13.5H2.5Z"),
-    _trace("hexagon", "0 0 16 16", "M8 1.5L14 5V11L8 14.5L2 11V5Z"),
-    '<span class="osk-pingpong"><span></span></span>',
-    f'<span class="osk-traffic">{_s(3)}</span>',
-    '<span class="osk-search"></span>',
-    f'<span class="osk-matrix">{_s(16)}</span>',
-    '<span class="osk-rotsq"></span>',
-    f'<span class="osk-quad">{_s(4)}</span>',
-    '<span class="osk-knight"></span>',
-    f'<span class="osk-thought">{_s(3)}</span>',
-    f'<span class="osk-diamonds">{_s(3)}</span>',
-    f'<span class="osk-snow">{_s(4)}</span>',
-])
+EXTRA_MARKUP = "".join(
+    [
+        f'<span class="osk-spiral">{_s(8)}</span>',
+        '<span class="osk-target"></span>',
+        f'<span class="osk-squarejump">{_s(3)}</span>',
+        '<span class="osk-seesaw"></span>',
+        '<span class="osk-propeller"></span>',
+        '<span class="osk-cog"></span>',
+        '<span class="osk-dotted"></span>',
+        f'<span class="osk-ios">{_s(12)}</span>',
+        f'<span class="osk-comet">{_s(6)}</span>',
+        '<span class="osk-marquee"></span>',
+        '<span class="osk-flame"></span>',
+        '<span class="osk-drop"></span>',
+        f'<span class="osk-rain">{_s(5)}</span>',
+        '<span class="osk-fill"></span>',
+        '<span class="osk-battery"><span></span></span>',
+        '<span class="osk-moon"></span>',
+        f'<span class="osk-sun">{_s(8)}</span>',
+        '<span class="osk-heart"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg></span>',
+        '<span class="osk-star"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7.1L12 17.6 5.7 21.3l1.7-7.1L2 9.5l7.1-.6z"/></svg></span>',
+        f'<span class="osk-spectrum">{_s(7)}</span>',
+        f'<span class="osk-bars3">{_s(3)}</span>',
+        f'<span class="osk-swap">{_s(2)}</span>',
+        f'<span class="osk-trio">{_s(3)}</span>',
+        '<span class="osk-satellite"><span></span></span>',
+        f'<span class="osk-atom">{_s(3)}</span>',
+        f'<span class="osk-binary">{_s(5)}</span>',
+        f'<span class="osk-segments">{_s(6)}</span>',
+        '<span class="osk-zigzag"><svg viewBox="0 0 24 12" aria-hidden="true"><path pathLength="50" d="M0 10L4 2L8 10L12 2L16 10L20 2L24 10"/></svg></span>',
+        _trace("squaretrace", "0 0 16 16", "M2.5 2.5H13.5V13.5H2.5Z"),
+        _trace("hexagon", "0 0 16 16", "M8 1.5L14 5V11L8 14.5L2 11V5Z"),
+        '<span class="osk-pingpong"><span></span></span>',
+        f'<span class="osk-traffic">{_s(3)}</span>',
+        '<span class="osk-search"></span>',
+        f'<span class="osk-matrix">{_s(16)}</span>',
+        '<span class="osk-rotsq"></span>',
+        f'<span class="osk-quad">{_s(4)}</span>',
+        '<span class="osk-knight"></span>',
+        f'<span class="osk-thought">{_s(3)}</span>',
+        f'<span class="osk-diamonds">{_s(3)}</span>',
+        f'<span class="osk-snow">{_s(4)}</span>',
+    ]
+)
 
 # Too wide for the small Thinking header icon.
 _WIDE = {"progress", "stripes", "pacman", "typewriter"} | EXTRA_WIDE
@@ -556,56 +712,64 @@ for _k in ("dna", "dotwave", "chart", "lines", "stairs", "cradle"):
     MORE_DISPLAY[_k] = "inline-flex"
 MORE_DISPLAY["squares"] = "inline-grid"
 MORE_DISPLAY.update(EXTRA_DISPLAY)
+MORE_DISPLAY.update({"domino": "inline-flex", "pulsesq": "inline-flex"})
 
 
 def _sorted_names(d, first):
     head = {k: d[k] for k in first if k in d}
-    rest = sorted(((k, v) for k, v in d.items() if k not in head), key=lambda kv: kv[1].lower())
+    rest = sorted(
+        ((k, v) for k, v in d.items() if k not in head), key=lambda kv: kv[1].lower()
+    )
     return {**head, **dict(rest)}
 
 
 STYLE_NAMES.update(MORE_STYLE_NAMES)
+STYLE_NAMES["random"] = "Random (new each message)"
+THINK_NAMES["random"] = "Random (new each time)"
 THINK_NAMES.update({k: v for k, v in MORE_STYLE_NAMES.items() if k not in _WIDE})
 DISPLAY.update(MORE_DISPLAY)
 NEW_STYLES.extend(MORE_STYLE_NAMES)
-STYLE_NAMES = _sorted_names(STYLE_NAMES, ("default",))
-THINK_NAMES = _sorted_names(THINK_NAMES, ("default", "none"))
+STYLE_NAMES = _sorted_names(STYLE_NAMES, ("default", "random"))
+THINK_NAMES = _sorted_names(THINK_NAMES, ("default", "none", "random"))
 STYLE_LITERAL = Literal[tuple(STYLE_NAMES)]
 THINK_LITERAL = Literal[tuple(THINK_NAMES)]
 
-MORE_MARKUP = "".join([
-    '<span class="osk-dualring"></span>',
-    f'<span class="osk-chase">{_s(8)}</span>',
-    f'<span class="osk-dna">{_s(5)}</span>',
-    '<span class="osk-pendulum"><span></span></span>',
-    f'<span class="osk-cradle">{_s(5)}</span>',
-    '<span class="osk-progress"><span></span></span>',
-    '<span class="osk-stripes"></span>',
-    '<span class="osk-hourglass"><svg viewBox="0 0 12 16" aria-hidden="true"><path d="M1 1h10M1 15h10M2 1c0 5 4 5 4 7s-4 2-4 7M10 1c0 5-4 5-4 7s4 2 4 7"/></svg></span>',
-    '<span class="osk-clock"></span>',
-    '<span class="osk-radar"></span>',
-    '<span class="osk-pulsering"></span>',
-    f'<span class="osk-squares">{_s(4)}</span>',
-    '<span class="osk-diamond"></span>',
-    '<span class="osk-sine"><svg viewBox="0 0 32 12" aria-hidden="true"><path pathLength="50" d="M0 6Q4 0 8 6T16 6T24 6T32 6"/></svg></span>',
-    f'<span class="osk-dotwave">{_s(5)}</span>',
-    f'<span class="osk-chart">{_s(4)}</span>',
-    '<span class="osk-typewriter"><span></span></span>',
-    '<span class="osk-underscore"></span>',
-    f'<span class="osk-lines">{_s(3)}</span>',
-    '<span class="osk-pacman"></span>',
-    '<span class="osk-infinity"><svg viewBox="0 0 24 12" aria-hidden="true"><path class="t" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/><path class="a" pathLength="100" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/></svg></span>',
-    '<span class="osk-triangle"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="t" d="M8 2L14.5 13.5H1.5Z"/><path class="a" pathLength="100" d="M8 2L14.5 13.5H1.5Z"/></svg></span>',
-    '<span class="osk-morph"></span>',
-    f'<span class="osk-dotring">{_s(12)}</span>',
-    f'<span class="osk-bubbles">{_s(3)}</span>',
-    f'<span class="osk-stairs">{_s(4)}</span>',
-    '<span class="osk-wifi"><svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1 5Q8 -2 15 5"/><path d="M3.5 7.5Q8 3.5 12.5 7.5"/><path d="M6 10Q8 8.2 10 10"/><circle cx="8" cy="12.5" r="1.2"/></svg></span>',
-    '<span class="osk-bolt"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 0L2 9h5l-1.5 7L14 6.5H9z"/></svg></span>',
-    f'<span class="osk-twinkle">{_s(4)}</span>',
-    '<span class="osk-gradient"></span>',
-    EXTRA_MARKUP,
-])
+MORE_MARKUP = "".join(
+    [
+        '<span class="osk-dualring"></span>',
+        f'<span class="osk-chase">{_s(8)}</span>',
+        f'<span class="osk-dna">{_s(5)}</span>',
+        '<span class="osk-pendulum"><span></span></span>',
+        f'<span class="osk-cradle">{_s(5)}</span>',
+        '<span class="osk-progress"><span></span></span>',
+        '<span class="osk-stripes"></span>',
+        '<span class="osk-hourglass"><svg viewBox="0 0 12 16" aria-hidden="true"><path d="M1 1h10M1 15h10M2 1c0 5 4 5 4 7s-4 2-4 7M10 1c0 5-4 5-4 7s4 2 4 7"/></svg></span>',
+        '<span class="osk-clock"></span>',
+        '<span class="osk-radar"></span>',
+        '<span class="osk-pulsering"></span>',
+        f'<span class="osk-squares">{_s(4)}</span>',
+        '<span class="osk-diamond"></span>',
+        '<span class="osk-sine"><svg viewBox="0 0 32 12" aria-hidden="true"><path pathLength="50" d="M0 6Q4 0 8 6T16 6T24 6T32 6"/></svg></span>',
+        f'<span class="osk-dotwave">{_s(5)}</span>',
+        f'<span class="osk-chart">{_s(4)}</span>',
+        '<span class="osk-typewriter"><span></span></span>',
+        '<span class="osk-underscore"></span>',
+        f'<span class="osk-lines">{_s(3)}</span>',
+        '<span class="osk-pacman"></span>',
+        '<span class="osk-infinity"><svg viewBox="0 0 24 12" aria-hidden="true"><path class="t" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/><path class="a" pathLength="100" d="M12 6C9 0 3 0 3 6S9 12 12 6S21 0 21 6S15 12 12 6Z"/></svg></span>',
+        '<span class="osk-triangle"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="t" d="M8 2L14.5 13.5H1.5Z"/><path class="a" pathLength="100" d="M8 2L14.5 13.5H1.5Z"/></svg></span>',
+        '<span class="osk-morph"></span>',
+        f'<span class="osk-dotring">{_s(12)}</span>',
+        f'<span class="osk-bubbles">{_s(3)}</span>',
+        f'<span class="osk-stairs">{_s(4)}</span>',
+        '<span class="osk-wifi"><svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1 5Q8 -2 15 5"/><path d="M3.5 7.5Q8 3.5 12.5 7.5"/><path d="M6 10Q8 8.2 10 10"/><circle cx="8" cy="12.5" r="1.2"/></svg></span>',
+        '<span class="osk-bolt"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 0L2 9h5l-1.5 7L14 6.5H9z"/></svg></span>',
+        f'<span class="osk-twinkle">{_s(4)}</span>',
+        '<span class="osk-gradient"></span>',
+        EXTRA_MARKUP,
+        V2_MARKUP,
+    ]
+)
 
 
 def _ring_css(cls, n, r, d, dur, anim):
@@ -738,6 +902,7 @@ MORE_CSS_STATIC = r"""
 @keyframes osk-tw{0%,100%{transform:scale(.3);opacity:.2}50%{transform:scale(1);opacity:1}}
 """
 
+
 def _radial(cls, n, span_css, tf, container_extra=""):
     out = [
         f".osk-{cls}{{position:relative;width:16px;height:16px;margin-left:4px;vertical-align:text-bottom;{container_extra}}}",
@@ -750,12 +915,13 @@ def _radial(cls, n, span_css, tf, container_extra=""):
 def _delays(cls, values):
     return "\n".join(
         f".osk-{cls}>span:nth-child({i + 1}){{animation-delay:{v:g}s}}"
-        for i, v in enumerate(values) if v
+        for i, v in enumerate(values)
+        if v
     )
 
 
 _DOT = "border-radius:9999px;background:var(--osk-m)"
-_ARC = [1, .65, .35]
+_ARC = [1, 0.65, 0.35]
 
 EXTRA_CSS_STATIC = r"""
 .osk-target{width:6px;height:6px;margin:0 7px;vertical-align:middle;border-radius:9999px;background:var(--osk-s);box-shadow:0 0 0 3px var(--osk-t),0 0 0 4.5px var(--osk-m);animation:osk-breathe 1.4s ease-in-out infinite}
@@ -866,40 +1032,65 @@ EXTRA_CSS_STATIC = r"""
 @keyframes osk-snow{0%{transform:translate(0,-4px);opacity:0}20%{opacity:1}50%{transform:translate(2px,5px)}80%{opacity:1}100%{transform:translate(-1px,14px);opacity:0}}
 """
 
-EXTRA_CSS = "\n".join([
-    EXTRA_CSS_STATIC.strip(),
-    _radial("spiral", 8, f"width:2.5px;height:2.5px;margin:-1.25px 0 0 -1.25px;{_DOT};animation:osk-fade 1s linear infinite",
-            lambda i: f"transform:rotate({i * 47}deg) translateY(-{1.2 + i * .85:.2f}px);animation-delay:-{i / 8:.3f}s"),
-    _radial("ios", 12, f"width:1.5px;height:4px;margin:-2px 0 0 -.75px;border-radius:1px;background:var(--osk-m);animation:osk-fade 1s linear infinite",
-            lambda i: f"transform:rotate({i * 30}deg) translateY(-5px);animation-delay:-{i / 12:.3f}s"),
-    _radial("comet", 6, f"width:4px;height:4px;margin:-2px 0 0 -2px;{_DOT}",
+EXTRA_CSS = "\n".join(
+    [
+        EXTRA_CSS_STATIC.strip(),
+        _radial(
+            "spiral",
+            8,
+            f"width:2.5px;height:2.5px;margin:-1.25px 0 0 -1.25px;{_DOT};animation:osk-fade 1s linear infinite",
+            lambda i: f"transform:rotate({i * 47}deg) translateY(-{1.2 + i * .85:.2f}px);animation-delay:-{i / 8:.3f}s",
+        ),
+        _radial(
+            "ios",
+            12,
+            f"width:1.5px;height:4px;margin:-2px 0 0 -.75px;border-radius:1px;background:var(--osk-m);animation:osk-fade 1s linear infinite",
+            lambda i: f"transform:rotate({i * 30}deg) translateY(-5px);animation-delay:-{i / 12:.3f}s",
+        ),
+        _radial(
+            "comet",
+            6,
+            f"width:4px;height:4px;margin:-2px 0 0 -2px;{_DOT}",
             lambda i: f"transform:rotate(-{i * 24}deg) translateY(-6px) scale({1 - i * .13:.2f});opacity:{1 - i * .16:.2f}",
-            "animation:osk-spin .9s linear infinite;"),
-    _radial("sun", 8, "width:1.5px;height:3.5px;margin:-1.75px 0 0 -.75px;border-radius:1px;background:var(--osk-m)",
+            "animation:osk-spin .9s linear infinite;",
+        ),
+        _radial(
+            "sun",
+            8,
+            "width:1.5px;height:3.5px;margin:-1.75px 0 0 -.75px;border-radius:1px;background:var(--osk-m)",
             lambda i: f"transform:rotate({i * 45}deg) translateY(-7px)",
-            "animation:osk-spin 6s linear infinite;"),
-    _radial("trio", 3, f"width:4px;height:4px;margin:-2px 0 0 -2px;{_DOT}",
+            "animation:osk-spin 6s linear infinite;",
+        ),
+        _radial(
+            "trio",
+            3,
+            f"width:4px;height:4px;margin:-2px 0 0 -2px;{_DOT}",
             lambda i: f"transform:rotate({i * 120}deg) translateY(-6px);opacity:{_ARC[i]}",
-            "animation:osk-spin .9s linear infinite;"),
-    _delays("squarejump", [0, .15, .3]),
-    _delays("rain", [0, -.3, -.6, -.15, -.45]),
-    _delays("spectrum", [0, -.5, -.2, -.7, -.35, -.1, -.6]),
-    _delays("bars3", [0, -.15, -.3]),
-    _delays("binary", [0, .15, .3, .45, .6]),
-    _delays("segments", [0, .12, .24, .36, .48, .6]),
-    _delays("traffic", [0, .2, .4]),
-    _delays("matrix", [-((i * 7) % 11) * .1 for i in range(16)]),
-    _delays("thought", [0, .2, .4]),
-    _delays("diamonds", [0, .15, .3]),
-    _delays("snow", [0, -.45, -.9, -1.35]),
-])
+            "animation:osk-spin .9s linear infinite;",
+        ),
+        _delays("squarejump", [0, 0.15, 0.3]),
+        _delays("rain", [0, -0.3, -0.6, -0.15, -0.45]),
+        _delays("spectrum", [0, -0.5, -0.2, -0.7, -0.35, -0.1, -0.6]),
+        _delays("bars3", [0, -0.15, -0.3]),
+        _delays("binary", [0, 0.15, 0.3, 0.45, 0.6]),
+        _delays("segments", [0, 0.12, 0.24, 0.36, 0.48, 0.6]),
+        _delays("traffic", [0, 0.2, 0.4]),
+        _delays("matrix", [-((i * 7) % 11) * 0.1 for i in range(16)]),
+        _delays("thought", [0, 0.2, 0.4]),
+        _delays("diamonds", [0, 0.15, 0.3]),
+        _delays("snow", [0, -0.45, -0.9, -1.35]),
+    ]
+)
 
-MORE_CSS = "\n".join([
-    MORE_CSS_STATIC.strip(),
-    _ring_css("chase", 8, 6, 3, 0.9, "osk-tail"),
-    _ring_css("dotring", 12, 6.5, 2.2, 1.2, "osk-fade"),
-    EXTRA_CSS,
-])
+MORE_CSS = "\n".join(
+    [
+        MORE_CSS_STATIC.strip(),
+        _ring_css("chase", 8, 6, 3, 0.9, "osk-tail"),
+        _ring_css("dotring", 12, 6.5, 2.2, 1.2, "osk-fade"),
+        EXTRA_CSS,
+        V2_CSS.strip(),
+    ]
+)
 
 
 OSK_CSS_BASE = r"""
@@ -1091,7 +1282,499 @@ def _build_generated_css() -> str:
     return "\n".join(rules)
 
 
-OSK_CSS = "\n".join([OSK_CSS_BASE.strip(), OSK_CSS_NEW.strip(), MORE_CSS, _build_generated_css()])
+# ---------------------------------------------------------------------------
+# 2.0.0: Thinking Words. Replaces the "Thinking..." label with rotating words.
+# ---------------------------------------------------------------------------
+TW_PACKS = {
+    "claude": [
+        "Thinking this through",
+        "Going over the details",
+        "Pondering",
+        "Trying harder",
+        "Mulling it over",
+        "Connecting the dots",
+        "Chewing on that",
+        "Weighing options",
+        "Digging deeper",
+        "Untangling this",
+        "Cooking up an answer",
+        "Working it out",
+        "Reading between the lines",
+        "Considering angles",
+        "Double-checking",
+        "Sharpening the answer",
+        "Almost there",
+        "Gathering my thoughts",
+        "Turning it over",
+        "Following the thread",
+        "Getting to the bottom of it",
+        "Looking at the big picture",
+        "Breaking it down",
+        "Piecing it together",
+        "Taking a closer look",
+        "Exploring possibilities",
+        "Checking my reasoning",
+        "Putting it all together",
+        "Examining the evidence",
+        "Sorting through ideas",
+        "Connecting the pieces",
+        "Thinking it over",
+        "Giving this some thought",
+        "Reflecting on this",
+        "Analyzing the question",
+        "Looking at it from every side",
+        "Trying another angle",
+        "Working through the logic",
+        "Making sense of it",
+        "Searching my memory",
+        "Narrowing it down",
+        "Drawing conclusions",
+        "Crafting a response",
+        "Organizing my thoughts",
+        "Finding the right words",
+        "Refining the answer",
+        "Polishing things up",
+        "Checking the facts",
+        "Considering the options",
+        "Balancing the details",
+        "Looking deeper",
+        "Thinking carefully",
+        "Giving it my full attention",
+        "Doing the heavy lifting",
+        "Running through scenarios",
+        "Testing a few ideas",
+        "Zooming in",
+        "Zooming out",
+        "Rethinking this",
+        "Second-guessing myself",
+        "Making a plan",
+        "Mapping it out",
+        "Laying it all out",
+        "Digesting this",
+        "Absorbing the details",
+        "Reading it again",
+        "Taking it step by step",
+        "Thinking out loud",
+        "Thinking really hard",
+        "Brainstorming",
+        "Deliberating",
+        "Contemplating",
+        "Ruminating",
+        "Cogitating",
+        "Noodling on it",
+        "Wrestling with this",
+        "Doing some mental math",
+        "Building the answer",
+        "Assembling my thoughts",
+        "Looking for the best approach",
+        "Choosing my words",
+        "Picking the best answer",
+        "Putting in the effort",
+        "Thinking deeply",
+        "Staying with it",
+        "Going the extra mile",
+        "Making sure it is right",
+        "Cross-checking",
+        "Reviewing my notes",
+        "Sketching it out",
+        "Finding the pattern",
+        "Spotting the catch",
+        "Tracing the logic",
+        "Chasing an idea",
+        "Catching a thought",
+        "Letting ideas simmer",
+        "Warming up",
+        "Getting my bearings",
+        "Gaining clarity",
+        "Seeing the whole picture",
+        "Getting the details right",
+        "Tying up loose ends",
+        "Weaving it together",
+        "Pulling it together",
+        "Fine-tuning",
+        "One moment",
+        "Hang tight",
+        "Bear with me",
+        "Just a sec",
+        "Working on it",
+        "Give me a moment",
+        "Deep in thought",
+        "Lost in thought",
+        "Wheels turning",
+        "Gears turning",
+        "Brain whirring",
+        "Neurons firing",
+        "Lightbulb loading",
+        "Coming up with something good",
+    ],
+    "dev": [
+        "Fixing bugs",
+        "Compiling thoughts",
+        "Refactoring ideas",
+        "Reading the docs",
+        "Rubber-ducking",
+        "Running tests",
+        "Resolving merge conflicts",
+        "Grepping my memory",
+        "Optimizing",
+        "Checking edge cases",
+        "Linting my thoughts",
+        "Clearing the cache",
+        "Reviewing the diff",
+        "Writing a unit test",
+        "Stack Overflow-ing",
+        "Deploying an answer",
+        "Squashing commits",
+        "Profiling the problem",
+        "Blaming the cache",
+        "Shipping it",
+    ],
+    "playful": [
+        "Consulting the oracle",
+        "Asking the hamsters",
+        "Herding thoughts",
+        "Warming up brain cells",
+        "Summoning wisdom",
+        "Shuffling neurons",
+        "Polishing the crystal ball",
+        "Feeding the gremlins",
+        "Stretching synapses",
+        "Brewing coffee for neurons",
+        "Doing mental gymnastics",
+        "Waking the wizards",
+        "Spinning the wheel",
+        "Poking the idea box",
+        "Tickling the hamster wheel",
+        "Cracking knuckles",
+    ],
+    "science": [
+        "Running the numbers",
+        "Formulating hypotheses",
+        "Calibrating",
+        "Simulating outcomes",
+        "Cross-referencing",
+        "Testing theories",
+        "Measuring twice",
+        "Crunching data",
+        "Peer reviewing myself",
+        "Isolating variables",
+        "Balancing the equation",
+        "Observing patterns",
+    ],
+    "hacker": [
+        "Initializing neural net",
+        "Decrypting the question",
+        "Parsing intent",
+        "Allocating brain",
+        "Handshaking with logic",
+        "Booting reasoning core",
+        "Tracing the stack",
+        "Injecting insight",
+        "Compiling answer",
+        "Bypassing the obvious",
+        "Sudo thinking",
+        "Opening a root shell",
+    ],
+    "zen": [
+        "Breathing",
+        "Finding clarity",
+        "Letting it settle",
+        "Taking a moment",
+        "Focusing",
+        "Seeking balance",
+        "Quieting the noise",
+        "Listening closely",
+    ],
+    "minimal": ["Thinking", "Reasoning", "Working", "Processing", "Considering"],
+}
+
+TW_PACK_NAMES = {
+    "default": "Default",
+    "off": "Original \u201cThinking\u2026\u201d",
+    "claude": "Claude-style",
+    "dev": "Dev & Debug",
+    "playful": "Playful",
+    "science": "Science Lab",
+    "hacker": "Hacker Terminal",
+    "zen": "Zen",
+    "minimal": "Minimal",
+    "mix": "Random Mix (all packs)",
+    "custom": "Custom (admin list)",
+}
+TW_GLYPHS = {
+    "default": "Aa",
+    "off": "\u2026",
+    "claude": "\u273a",
+    "dev": "</>",
+    "playful": "\u2728",
+    "science": "\u2697",
+    "hacker": ">_",
+    "zen": "\u262f",
+    "minimal": "\u00b7",
+    "mix": "\u221e",
+    "custom": "\u270e",
+}
+TW_FX_NAMES = {
+    "default": "Default",
+    "random": "Random (changes every phrase)",
+    "shimmer": "Shimmer Sweep",
+    "gradient": "Gradient Flow",
+    "rainbow": "Rainbow",
+    "neon": "Neon Flicker",
+    "glow": "Soft Glow",
+    "fade": "Fade Rise",
+    "slide": "Slot Slide",
+    "typewriter": "Typewriter",
+    "scramble": "Decode / Scramble",
+    "blur": "Blur In",
+    "wave": "Letter Wave",
+    "bounce": "Letter Drop",
+    "cascade": "Letter Cascade",
+    "glitch": "Glitch",
+    "pop": "Pop",
+    "flip": "Flip In",
+    "reveal": "Wipe Reveal",
+    "pulse": "Soft Pulse",
+    "plain": "Plain",
+}
+TW_FX_POOL = [k for k in TW_FX_NAMES if k not in ("default", "random", "plain")]
+TW_FONTS = {
+    "mono": "font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;font-size:.92em",
+    "serif": "font-family:Georgia,'Times New Roman',serif",
+    "italic": "font-family:'Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;font-style:italic",
+    "rounded": "font-family:ui-rounded,'SF Pro Rounded',Nunito,Quicksand,'Varela Round',system-ui,sans-serif;font-weight:600",
+    "hand": "font-family:'Segoe Print','Bradley Hand','Chalkboard SE','Comic Sans MS','Comic Neue',cursive;font-size:1.05em",
+    "caps": "text-transform:uppercase;letter-spacing:.14em;font-size:.78em;font-weight:600",
+    "small": "font-variant:small-caps;letter-spacing:.08em;font-size:1.05em",
+}
+TW_FONT_NAMES = {
+    "default": "Default",
+    "random": "Random (changes every phrase)",
+    "theme": "Match Theme",
+    "mono": "Monospace",
+    "serif": "Serif",
+    "italic": "Elegant Italic",
+    "rounded": "Rounded",
+    "hand": "Handwritten",
+    "caps": "Wide Caps",
+    "small": "Small Caps",
+}
+TW_FONT_POOL = ["theme"] + list(TW_FONTS)
+TW_COLORS = {
+    "orange": ("#d97757", "#ffb59a", "#b4532f"),
+    "blue": ("#3b82f6", "#93c5fd", "#1d4ed8"),
+    "purple": ("#8b5cf6", "#c4b5fd", "#6d28d9"),
+    "green": ("#10b981", "#6ee7b7", "#047857"),
+    "pink": ("#ec4899", "#f9a8d4", "#be185d"),
+    "gold": ("#f59e0b", "#fde68a", "#b45309"),
+    "cyan": ("#06b6d4", "#67e8f9", "#0e7490"),
+    "aurora": ("#34d399", "#60a5fa", "#a78bfa"),
+    "sunset": ("#f97316", "#ec4899", "#8b5cf6"),
+}
+TW_COLOR_NAMES = {
+    "default": "Default",
+    "random": "Random (changes every phrase)",
+    "theme": "Match Theme",
+    "orange": "Claude Orange",
+    "blue": "Blue",
+    "purple": "Purple",
+    "green": "Green",
+    "pink": "Pink",
+    "gold": "Gold",
+    "cyan": "Cyan",
+    "aurora": "Aurora",
+    "sunset": "Sunset",
+}
+TW_RHYTHM_NAMES = {
+    "default": "Default",
+    "steady": "Steady",
+    "natural": "Natural (varies +/-40%)",
+}
+TW_TIMER_NAMES = {"default": "Default", "off": "Off", "on": "Show seconds"}
+
+TW_PACK_LITERAL = Literal[tuple(k for k in TW_PACK_NAMES if k != "default")]
+TW_FX_LITERAL = Literal[tuple(k for k in TW_FX_NAMES if k != "default")]
+TW_FONT_LITERAL = Literal[tuple(k for k in TW_FONT_NAMES if k != "default")]
+TW_COLOR_LITERAL = Literal[tuple(k for k in TW_COLOR_NAMES if k != "default")]
+TW_RHYTHM_LITERAL = Literal[tuple(k for k in TW_RHYTHM_NAMES if k != "default")]
+
+TW_CSS_BASE = r"""
+:root{--tw-a:#6b7280;--tw-b:#111827;--tw-c:#9ca3af;--osk-tw-dur:2400ms}
+html.dark{--tw-a:#8e8e93;--tw-b:#ffffff;--tw-c:#636366}
+.osk-orig{display:none!important}
+.osk-nosh{background:none!important;animation:none!important}
+.osk-sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.osk-tw{display:inline-flex;align-items:baseline;gap:0;vertical-align:baseline;max-width:100%}
+.osk-tw[data-clip="1"]{clip-path:inset(0)}
+.osk-tw-w,.osk-pv-s{display:inline-block;position:relative;white-space:nowrap;color:var(--tw-a);-webkit-text-fill-color:var(--tw-a);font-weight:500;line-height:1.3}
+.osk-pv.osk-pv-t{width:88px}
+.osk-pv.osk-pv-t>span{display:inline-block}
+.osk-pv-s{--osk-tw-dur:2600ms;font-size:.8rem;margin-left:4px}
+.osk-pv-t:has(.osk-pv-s[data-fx="slide"]){clip-path:inset(0)}
+.osk-l{display:inline-block}
+.osk-tw-d{display:none}
+html[data-osk-tw-dots] .osk-tw-d{display:inline-flex;margin-left:.06em;letter-spacing:0;line-height:1.3}
+.osk-tw-d i{font-style:normal;color:var(--tw-a);-webkit-text-fill-color:var(--tw-a);animation:osk-tw-dot 1.2s infinite}
+.osk-tw-d i::before{content:'.'}
+.osk-tw-d i:nth-child(2){animation-delay:.2s}
+.osk-tw-d i:nth-child(3){animation-delay:.4s}
+.osk-tw-t{display:none;margin-left:.3em;opacity:.55;font-size:.9em;font-variant-numeric:tabular-nums;-webkit-text-fill-color:currentColor}
+html[data-osk-tw-timer="on"] .osk-tw-t{display:inline}
+.osk-tw-t::before{content:'\00b7\00a0'}
+.osk-heading{margin:.85rem 0 .5rem;font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--color-gray-400,#9ca3af)}
+.osk-range-row{display:flex;align-items:center;gap:8px}
+.osk-range{width:128px;height:4px;cursor:pointer;accent-color:#d97757}
+.osk-range-v{min-width:2.4rem;text-align:right;font-size:.75rem;font-variant-numeric:tabular-nums;color:var(--color-gray-500,#6b7280)}
+.osk-range-r{padding:0;border:0;background:none;font-size:.6875rem;text-decoration:underline;cursor:pointer;color:var(--color-gray-400,#9ca3af)}
+.osk-range-r[hidden]{display:none}
+.osk-pv-s[data-color="aurora"],.osk-pv-s[data-color="sunset"],.osk-pv-s[data-color="random"]{background:linear-gradient(90deg,var(--tw-a),var(--tw-b),var(--tw-c));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.osk-pv-s[data-color="random"]{--tw-a:#f87171;--tw-b:#fbbf24;--tw-c:#60a5fa}
+@keyframes osk-tw-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes osk-tw-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-5px)}}
+@keyframes osk-tw-shim{from{background-position:200% 0}to{background-position:-100% 0}}
+@keyframes osk-tw-flow{from{background-position:0 0}to{background-position:300% 0}}
+@keyframes osk-tw-slidein{from{transform:translateY(115%);opacity:0}to{transform:none;opacity:1}}
+@keyframes osk-tw-slideout{from{transform:none;opacity:1}to{transform:translateY(-115%);opacity:0}}
+@keyframes osk-tw-type{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes osk-tw-caret{50%{background:transparent}}
+@keyframes osk-tw-blurin{from{filter:blur(10px);opacity:0}to{filter:none;opacity:1}}
+@keyframes osk-tw-blurout{from{filter:none;opacity:1}to{filter:blur(10px);opacity:0}}
+@keyframes osk-tw-glow{from{text-shadow:0 0 2px var(--tw-a),0 0 6px var(--tw-a)}to{text-shadow:0 0 7px var(--tw-b),0 0 18px var(--tw-a)}}
+@keyframes osk-tw-flick{0%,19%,21%,23%,25%,54%,56%,100%{opacity:1}20%,24%,55%{opacity:.3}}
+@keyframes osk-tw-bob{0%,60%,100%{transform:none}30%{transform:translateY(-3px)}}
+@keyframes osk-tw-drop{from{transform:translateY(-1.1em);opacity:0}to{transform:none;opacity:1}}
+@keyframes osk-tw-gl{0%,88%,100%{opacity:0;transform:none}91%{opacity:.9;transform:translate(-3px,1px)}95%{opacity:.9;transform:translate(3px,-1px)}}
+@keyframes osk-tw-glm{0%,89%,100%{transform:none}91%{transform:translate(-2px,0) skewX(10deg)}94%{transform:translate(2px,1px) skewX(-8deg)}96%{transform:none}}
+@keyframes osk-tw-pop{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+@keyframes osk-tw-flip{from{transform:perspective(220px) rotateX(-90deg);opacity:0}to{transform:perspective(220px) rotateX(0);opacity:1}}
+@keyframes osk-tw-reveal{from{-webkit-mask-position:100% 0;mask-position:100% 0}to{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes osk-tw-pulse{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes osk-tw-dot{0%,80%,100%{opacity:.2}40%{opacity:1}}
+"""
+
+
+def _tw_css() -> str:
+    out = [TW_CSS_BASE.strip()]
+    OUTD = "max(0s,calc(var(--osk-tw-dur) - .45s))"
+    clip = "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent"
+
+    def fx(k, decl, pseudo="", child=""):
+        out.append(
+            f'.osk-tw-w[data-fx="{k}"]{child}{pseudo},.osk-pv-s[data-fx="{k}"]{child}{pseudo}{{{decl}}}'
+        )
+
+    fx(
+        "shimmer",
+        "background:linear-gradient(100deg,var(--tw-a) 38%,var(--tw-b) 50%,var(--tw-a) 62%) 200% 0/250% 100%;"
+        + clip
+        + ";animation:osk-tw-in .4s ease both,osk-tw-shim 1.8s linear infinite",
+    )
+    fx(
+        "gradient",
+        "background:linear-gradient(90deg,var(--tw-a),var(--tw-b),var(--tw-c),var(--tw-a)) 0 0/300% 100%;"
+        + clip
+        + ";animation:osk-tw-in .4s ease both,osk-tw-flow 3s linear infinite",
+    )
+    fx(
+        "rainbow",
+        "background:linear-gradient(90deg,#f87171,#fbbf24,#34d399,#60a5fa,#a78bfa,#f87171) 0 0/300% 100%;"
+        + clip
+        + ";animation:osk-tw-in .4s ease both,osk-tw-flow 3.5s linear infinite",
+    )
+    fx(
+        "neon",
+        "color:var(--tw-b);-webkit-text-fill-color:var(--tw-b);text-shadow:0 0 4px var(--tw-a),0 0 12px var(--tw-a),0 0 26px var(--tw-a);animation:osk-tw-in .3s ease both,osk-tw-flick 3s linear infinite",
+    )
+    fx(
+        "glow",
+        "color:var(--tw-b);-webkit-text-fill-color:var(--tw-b);animation:osk-tw-in .4s ease both,osk-tw-glow 1.6s ease-in-out infinite alternate",
+    )
+    fx(
+        "fade",
+        f"animation:osk-tw-in .4s ease both,osk-tw-out .4s ease-in {OUTD} forwards",
+    )
+    fx(
+        "slide",
+        f"animation:osk-tw-slidein .45s cubic-bezier(.2,.8,.2,1) both,osk-tw-slideout .4s ease-in {OUTD} forwards",
+    )
+    fx(
+        "typewriter",
+        "animation:osk-tw-type min(1s,calc(var(--osk-tw-dur)*.45)) steps(var(--n,12),end) both",
+    )
+    fx(
+        "typewriter",
+        "content:'';display:inline-block;width:.09em;height:1em;margin-left:2px;vertical-align:-.14em;background:var(--tw-a);-webkit-text-fill-color:initial;animation:osk-tw-caret .8s step-end infinite",
+        "::after",
+    )
+    fx(
+        "scramble",
+        "font-variant-numeric:tabular-nums;letter-spacing:.02em;animation:osk-tw-in .2s ease both",
+    )
+    fx(
+        "blur",
+        f"animation:osk-tw-blurin .6s ease both,osk-tw-blurout .5s ease-in {OUTD} forwards",
+    )
+    fx("wave", "animation:osk-tw-in .4s ease both")
+    fx(
+        "wave",
+        "animation:osk-tw-bob 1.4s ease-in-out infinite;animation-delay:calc(var(--i,0)*70ms)",
+        child=" .osk-l",
+    )
+    fx(
+        "bounce",
+        "animation:osk-tw-drop .6s cubic-bezier(.3,1.6,.5,1) both;animation-delay:calc(var(--i,0)*45ms)",
+        child=" .osk-l",
+    )
+    fx(
+        "cascade",
+        "animation:osk-tw-in .5s ease both;animation-delay:calc(var(--i,0)*40ms)",
+        child=" .osk-l",
+    )
+    fx("glitch", "animation:osk-tw-in .3s ease both,osk-tw-glm 2.4s steps(1) infinite")
+    g = "content:attr(data-text);position:absolute;left:0;top:0;opacity:0;pointer-events:none;-webkit-text-fill-color:currentColor"
+    fx("glitch", g + ";color:#22d3ee;animation:osk-tw-gl 2.4s infinite", "::before")
+    fx(
+        "glitch",
+        g + ";color:#f472b6;animation:osk-tw-gl 2.4s .08s infinite reverse",
+        "::after",
+    )
+    fx("pop", "animation:osk-tw-pop .5s cubic-bezier(.3,1.7,.5,1) both")
+    fx("flip", "transform-origin:50% 60%;animation:osk-tw-flip .6s ease both")
+    fx(
+        "reveal",
+        "-webkit-mask-image:linear-gradient(90deg,#000 45%,transparent 65%);mask-image:linear-gradient(90deg,#000 45%,transparent 65%);-webkit-mask-size:300% 100%;mask-size:300% 100%;animation:osk-tw-reveal 1s ease both",
+    )
+    fx(
+        "pulse",
+        "animation:osk-tw-in .4s ease both,osk-tw-pulse 1.6s ease-in-out .4s infinite",
+    )
+
+    for k, decl in TW_FONTS.items():
+        out.append(f'.osk-tw-w[data-font="{k}"],.osk-pv-s[data-font="{k}"]{{{decl}}}')
+    for k, (a, b, c) in TW_COLORS.items():
+        out.append(
+            f'html[data-osk-tw-color="{k}"],.osk-pv-s[data-color="{k}"]{{--tw-a:{a};--tw-b:{b};--tw-c:{c}}}'
+        )
+    out.append(
+        "@media (prefers-reduced-motion:reduce){.osk-tw-w,.osk-tw-w::before,.osk-tw-w::after,.osk-l,.osk-tw-d i,.osk-pv-s{"
+        "animation:none!important;background:none!important;clip-path:none!important;filter:none!important;text-shadow:none!important;"
+        "-webkit-mask-image:none!important;mask-image:none!important;-webkit-text-fill-color:var(--tw-a)!important}"
+        ".osk-tw-w::before,.osk-tw-w::after{display:none}}"
+    )
+    return "\n".join(out)
+
+
+TW_CSS = _tw_css()
+
+OSK_CSS = "\n".join(
+    [
+        OSK_CSS_BASE.strip(),
+        OSK_CSS_NEW.strip(),
+        MORE_CSS,
+        _build_generated_css(),
+        TW_CSS,
+    ]
+)
 
 LOADER_SCRIPT = r"""
 (function () {
@@ -1158,9 +1841,19 @@ LOADER_SCRIPT = r"""
       return value === 'default' ? spec.fallback : value;
     }
 
+    var POOL = ORDER.filter(function (k) { return k !== 'default' && k !== 'none' && k !== 'random'; });
+
+    function roll() {
+      var cur = ROOT.getAttribute(spec.attr);
+      var pick = cur;
+      for (var tries = 0; tries < 8 && (pick === cur || !pick); tries++) pick = POOL[Math.floor(Math.random() * POOL.length)];
+      ROOT.setAttribute(spec.attr, pick);
+    }
+
     function apply() {
       var value = effective();
-      if (value === 'default') ROOT.removeAttribute(spec.attr);
+      if (value === 'random' && spec.roll) roll();
+      else if (value === 'default') ROOT.removeAttribute(spec.attr);
       else ROOT.setAttribute(spec.attr, value);
     }
 
@@ -1172,10 +1865,14 @@ LOADER_SCRIPT = r"""
     function preview(value) {
       var shown = value === 'default' ? spec.fallback : value;
       if (shown === 'default' && spec.defaultPreview) shown = spec.defaultPreview;
+      if (spec.preview) return spec.preview(shown, value);
       var el = document.createElement('span');
       el.className = 'osk-pv';
       el.setAttribute('aria-hidden', 'true');
-      if (shown !== 'default' && shown !== 'none') {
+      if (shown === 'random') {
+        el.textContent = '\uD83C\uDFB2';
+        el.style.paddingLeft = '4px';
+      } else if (shown !== 'default' && shown !== 'none') {
         el.setAttribute('data-pv', shown);
         el.innerHTML = MARKUP;
       }
@@ -1329,6 +2026,12 @@ LOADER_SCRIPT = r"""
       var note = document.createElement('p');
       note.className = 'mt-1.5 text-[0.6875rem] text-gray-400 dark:text-gray-600';
       note.textContent = spec.note;
+      if (spec.heading) {
+        var head = document.createElement('div');
+        head.className = 'osk-heading';
+        head.textContent = spec.heading;
+        block.appendChild(head);
+      }
       block.appendChild(line);
       block.appendChild(note);
       at.parent.insertBefore(block, at.before);
@@ -1346,6 +2049,7 @@ LOADER_SCRIPT = r"""
     });
 
     self.apply = apply;
+    self.reroll = function () { if (spec.roll && effective() === 'random') roll(); };
     self.closeMenu = closeMenu;
     self.ensureRow = ensureRow;
     self.check = check;
@@ -1356,6 +2060,7 @@ LOADER_SCRIPT = r"""
     id: 'osk-setting',
     key: 'owui-message-loading-indicator',
     attr: 'data-osk',
+    roll: true,
     names: CFG.names,
     fallback: CFG.fallback,
     defaultPreview: 'cursor',
@@ -1380,6 +2085,7 @@ LOADER_SCRIPT = r"""
     id: 'osk-think-setting',
     key: 'owui-thinking-indicator',
     attr: 'data-osk-think',
+    roll: true,
     names: CFG.thinkNames,
     fallback: CFG.thinkFallback,
     defaultPreview: 'spinner',
@@ -1398,6 +2104,420 @@ LOADER_SCRIPT = r"""
     }
   });
 
+  // =====================================================================
+  // v2: Thinking Words. Swaps Open WebUI's "Thinking..." text for rotating
+  // words. The original text node is MOVED (not copied) into a hidden wrapper,
+  // so Svelte keeps updating it and everything is restored when thinking ends.
+  // =====================================================================
+  var TW = (function () {
+    var T = CFG.tw;
+    var pickers = [];
+    var timer = null;
+    var pvTimer = null;
+    var KEY_MS = 'owui-thinking-words-interval';
+    var LETTERS = { wave: 1, bounce: 1, cascade: 1 };
+    var GL = '!<>-_/[]{}=+*^?#abcdefghijklmnopqrstuvwxyz0123456789';
+    var PALETTE = [
+      ['#d97757', '#ffb59a', '#b4532f'], ['#3b82f6', '#93c5fd', '#1d4ed8'],
+      ['#8b5cf6', '#c4b5fd', '#6d28d9'], ['#10b981', '#6ee7b7', '#047857'],
+      ['#ec4899', '#f9a8d4', '#be185d'], ['#f59e0b', '#fde68a', '#b45309'],
+      ['#06b6d4', '#67e8f9', '#0e7490'], ['#34d399', '#60a5fa', '#a78bfa'],
+      ['#f97316', '#ec4899', '#8b5cf6']
+    ];
+    var re;
+    try { re = new RegExp('^\\s*(?:' + T.pattern + ')', 'i'); } catch (e) { re = /^\s*(?:thinking|reasoning)/i; }
+    if (T.dots) ROOT.setAttribute('data-osk-tw-dots', '1');
+
+    function storedMs() {
+      try {
+        var v = parseFloat(localStorage.getItem(KEY_MS));
+        if (v >= 0.3 && v <= 30) return Math.round(v * 1000);
+      } catch (e) {}
+      return Math.round(T.interval * 1000);
+    }
+    var baseMs = storedMs();
+
+    function rand(list) { return list[Math.floor(Math.random() * list.length)]; }
+    function pack() {
+      var p = ROOT.getAttribute('data-osk-tw');
+      return !p || p === 'off' ? 'default' : p;
+    }
+    function sig() {
+      return [pack(), ROOT.getAttribute('data-osk-tw-fx'), ROOT.getAttribute('data-osk-tw-font'),
+        ROOT.getAttribute('data-osk-tw-color'), ROOT.getAttribute('data-osk-tw-rhythm'), baseMs].join('|');
+    }
+    function holdFor() {
+      return ROOT.getAttribute('data-osk-tw-rhythm') === 'natural'
+        ? Math.round(baseMs * (0.6 + Math.random() * 0.8)) : baseMs;
+    }
+    function pickFx(last) {
+      var f = ROOT.getAttribute('data-osk-tw-fx') || 'shimmer';
+      if (f !== 'random') return f;
+      var n = rand(T.fxPool);
+      return n === last ? rand(T.fxPool) : n;
+    }
+    function pickFont() {
+      var f = ROOT.getAttribute('data-osk-tw-font') || 'theme';
+      return f === 'random' ? rand(T.fontPool) : f;
+    }
+
+    function wordsFor(p) {
+      var list = [];
+      if (p === 'mix') {
+        Object.keys(T.packs).forEach(function (k) { list = list.concat(T.packs[k]); });
+      } else if (p === 'custom') {
+        list = T.custom.length ? T.custom : T.packs.claude;
+      } else {
+        list = T.packs[p] || T.packs.claude;
+      }
+      return list.length ? list : ['Thinking'];
+    }
+    function shuffle(a) {
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+    function next(st, list) {
+      if (T.order === 'sequential') {
+        st.i = (st.i + 1) % list.length;
+        return list[st.i];
+      }
+      if (!st.deck.length || st.deckPack !== st.pack) {
+        st.deck = shuffle(list.slice());
+        st.deckPack = st.pack;
+      }
+      var w = st.deck.pop();
+      if (w === st.last && st.deck.length) { var alt = st.deck.pop(); st.deck.unshift(w); w = alt; }
+      st.last = w;
+      return w;
+    }
+
+    // Decode effect: random glyphs resolve into the word. Uses a text node's
+    // nodeValue so the page's MutationObserver is not woken on every frame.
+    function scramble(node, text) {
+      var tn = document.createTextNode('');
+      node.textContent = '';
+      node.appendChild(tn);
+      var chars = Array.from(text);
+      var n = chars.length;
+      var total = 12 + n;
+      var f = 0;
+      var id = setInterval(function () {
+        f++;
+        if (f >= total || !tn.parentNode) { tn.nodeValue = text; clearInterval(id); return; }
+        var reveal = Math.floor((f / total) * n * 1.2);
+        var out = '';
+        for (var i = 0; i < n; i++) out += (i < reveal || chars[i] === ' ') ? chars[i] : GL.charAt(Math.floor(Math.random() * GL.length));
+        tn.nodeValue = out;
+      }, 45);
+    }
+
+    function build(node, text, fx) {
+      node.setAttribute('data-text', text);
+      node.style.setProperty('--n', String(Math.max(1, text.length)));
+      if (LETTERS[fx]) {
+        node.textContent = '';
+        var chars = Array.from(text);
+        for (var i = 0; i < chars.length; i++) {
+          var l = document.createElement('span');
+          l.className = 'osk-l';
+          l.style.setProperty('--i', String(i));
+          l.textContent = chars[i] === ' ' ? '\u00a0' : chars[i];
+          node.appendChild(l);
+        }
+      } else if (fx === 'scramble') {
+        scramble(node, text);
+      } else {
+        node.textContent = text;
+      }
+    }
+
+    function render(el) {
+      var st = el._tw;
+      st.pack = pack();
+      var fx = pickFx(st.fx);
+      st.fx = fx;
+      var w = document.createElement('span');
+      w.className = 'osk-tw-w';
+      w.setAttribute('aria-hidden', 'true');
+      w.setAttribute('dir', 'auto');
+      w.setAttribute('data-fx', fx);
+      w.setAttribute('data-font', pickFont());
+      st.hold = holdFor();
+      w.style.setProperty('--osk-tw-dur', st.hold + 'ms');
+      build(w, next(st, wordsFor(st.pack)), fx);
+      if (ROOT.getAttribute('data-osk-tw-color') === 'random') {
+        var c = rand(PALETTE);
+        w.style.setProperty('--tw-a', c[0]);
+        w.style.setProperty('--tw-b', c[1]);
+        w.style.setProperty('--tw-c', c[2]);
+      }
+      el.setAttribute('data-clip', fx === 'slide' ? '1' : '');
+      if (st.w && st.w.parentNode === el) el.replaceChild(w, st.w);
+      else el.insertBefore(w, st.dots);
+      st.w = w;
+      st.sig = sig();
+      st.at = Date.now();
+    }
+
+    function findLabel(svg) {
+      var header = svg.closest('button[aria-expanded]') || svg.closest('.shimmer') || svg.parentElement;
+      if (!header) return null;
+      var walker = document.createTreeWalker(header, NodeFilter.SHOW_TEXT, null);
+      var node;
+      while ((node = walker.nextNode())) {
+        var p = node.parentElement;
+        if (!p || p.closest('svg, .osk-th, .osk-tw, .osk-orig')) continue;
+        var t = (node.nodeValue || '').trim();
+        if (t && re.test(t)) return node;
+      }
+      return null;
+    }
+
+    function mount(svg, node) {
+      var orig = document.createElement('span');
+      orig.className = 'osk-orig';
+      node.parentNode.insertBefore(orig, node);
+      orig.appendChild(node);
+      var el = document.createElement('span');
+      el.className = 'osk-tw';
+      var sr = document.createElement('span');
+      sr.className = 'osk-sr';
+      sr.textContent = (node.nodeValue || '').trim();
+      var dots = document.createElement('span');
+      dots.className = 'osk-tw-d';
+      dots.setAttribute('aria-hidden', 'true');
+      dots.innerHTML = '<i></i><i></i><i></i>';
+      var tm = document.createElement('span');
+      tm.className = 'osk-tw-t';
+      tm.setAttribute('aria-hidden', 'true');
+      var tt = document.createTextNode('0s');
+      tm.appendChild(tt);
+      el.appendChild(sr);
+      el.appendChild(dots);
+      el.appendChild(tm);
+      orig.parentNode.insertBefore(el, orig.nextSibling);
+      var host = el.closest('.shimmer');
+      if (host) host.classList.add('osk-nosh');
+      el._tw = { i: -1, deck: [], deckPack: '', last: '', fx: '', start: Date.now(), dots: dots, w: null, tm: tt, tmv: '', sig: '', at: 0, hold: baseMs, pack: pack() };
+      el._oskSvg = svg;
+      el._oskNode = node;
+      el._oskOrig = orig;
+      el._oskHost = host;
+      svg._oskTwEl = el;
+      render(el);
+    }
+
+    function teardown(el) {
+      var node = el._oskNode;
+      var orig = el._oskOrig;
+      if (orig && orig.parentNode) {
+        if (node && node.parentNode === orig) orig.parentNode.insertBefore(node, orig);
+        orig.remove();
+      }
+      if (el._oskHost) el._oskHost.classList.remove('osk-nosh');
+      if (el._oskSvg) el._oskSvg._oskTwEl = null;
+      el.remove();
+    }
+
+    function tick() {
+      var els = document.querySelectorAll('.osk-tw');
+      if (!els.length) { clearInterval(timer); timer = null; return; }
+      var now = Date.now();
+      var timerOn = ROOT.getAttribute('data-osk-tw-timer') === 'on';
+      var s0 = sig();
+      for (var i = 0; i < els.length; i++) {
+        var st = els[i]._tw;
+        if (!st) continue;
+        if (now - st.at >= st.hold || st.sig !== s0) render(els[i]);
+        if (timerOn) {
+          var s = Math.floor((now - st.start) / 1000);
+          var v = s < 60 ? s + 's' : Math.floor(s / 60) + 'm ' + ('0' + (s % 60)).slice(-2) + 's';
+          if (v !== st.tmv) { st.tmv = v; st.tm.nodeValue = v; }
+        }
+      }
+    }
+
+    // Called from scan() with every Thinking spinner svg currently on the page.
+    function sync(svgs) {
+      var on = pack() !== 'default';
+      if (on) {
+        for (var i = 0; i < svgs.length; i++) {
+          var svg = svgs[i];
+          if (svg._oskTwEl && svg._oskTwEl.isConnected) continue;
+          var sheet = svg.querySelector('style');
+          if (!sheet || sheet.textContent.indexOf('spinner_') === -1) continue;
+          var node = findLabel(svg);
+          if (node) mount(svg, node);
+        }
+      }
+      var els = document.querySelectorAll('.osk-tw');
+      for (var j = 0; j < els.length; j++) {
+        var el = els[j];
+        if (!on || !el._oskSvg || !el._oskSvg.isConnected) teardown(el);
+      }
+      var origs = document.querySelectorAll('.osk-orig');
+      for (var k = 0; k < origs.length; k++) if (!origs[k].firstChild) origs[k].remove();
+      if (!timer && document.querySelector('.osk-tw')) timer = setInterval(tick, 200);
+    }
+
+    // ---- settings rows -------------------------------------------------
+    function after(prevId) {
+      return function () {
+        var prev = document.getElementById(prevId);
+        var label = document.getElementById(prevId + '-label');
+        if (!prev || !prev.parentElement || !label) return null;
+        return { parent: prev.parentElement, before: prev.nextSibling, rowClass: label.parentElement.className, nameClass: label.className };
+      };
+    }
+
+    // Dropdown previews replay every 2.6s so each effect shows its real motion.
+    function restart(s) {
+      build(s, s.getAttribute('data-text') || 'Thinking', s.getAttribute('data-fx'));
+      s.style.animation = 'none';
+      void s.offsetWidth;
+      s.style.animation = '';
+    }
+    function pvLoop() {
+      if (pvTimer) return;
+      pvTimer = setInterval(function () {
+        var list = document.querySelectorAll('.osk-pv-s[data-fx]');
+        if (!list.length) { clearInterval(pvTimer); pvTimer = null; return; }
+        for (var i = 0; i < list.length; i++) restart(list[i]);
+      }, 2600);
+    }
+    function pv(text, attrs, fx) {
+      var el = document.createElement('span');
+      el.className = 'osk-pv osk-pv-t';
+      el.setAttribute('aria-hidden', 'true');
+      var s = document.createElement('span');
+      s.className = 'osk-pv-s';
+      for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) s.setAttribute(k, attrs[k]);
+      if (fx) { build(s, text, fx); pvLoop(); } else s.textContent = text;
+      el.appendChild(s);
+      return el;
+    }
+    var DICE = '\uD83C\uDFB2';
+    function add(id, key, attr, names, fallback, title, note, preview, heading, prev) {
+      var p = makePicker({
+        id: id, key: key, attr: attr, names: names, fallback: fallback, defaultPreview: null,
+        title: title, note: note, preview: preview, heading: heading, place: after(prev)
+      });
+      pickers.push(p);
+      return p;
+    }
+
+    add('osk-tw-words', 'owui-thinking-words', 'data-osk-tw', T.packNames, T.fallbacks.pack,
+      'Thinking Words', 'Rotating words shown instead of the plain \u201cThinking\u2026\u201d label while a model reasons. Saved in this browser.',
+      function (shown) { return pv(T.glyphs[shown] || 'Aa', {}); }, 'Thinking label', 'osk-think-setting');
+    add('osk-tw-fx', 'owui-thinking-words-fx', 'data-osk-tw-fx', T.fxNames, T.fallbacks.fx,
+      'Phrase Effect', 'How each phrase animates in. Random picks a different effect every time the phrase changes.',
+      function (shown) { return shown === 'random' ? pv(DICE, {}) : pv('Thinking', { 'data-fx': shown }, shown); }, null, 'osk-tw-words');
+    add('osk-tw-font', 'owui-thinking-words-font', 'data-osk-tw-font', T.fontNames, T.fallbacks.font,
+      'Phrase Font', 'Typeface for the thinking phrases (fonts already on your device).',
+      function (shown) { return shown === 'random' ? pv(DICE, {}) : pv('Aa', { 'data-font': shown }); }, null, 'osk-tw-fx');
+    add('osk-tw-color', 'owui-thinking-words-color', 'data-osk-tw-color', T.colorNames, T.fallbacks.color,
+      'Phrase Color', 'Color or gradient of the thinking phrases.',
+      function (shown) { return pv('Abc', { 'data-color': shown }); }, null, 'osk-tw-font');
+
+    // Slider: how long each word stays (0.4s - 10s).
+    var slider = (function () {
+      var id = 'osk-tw-interval';
+      function fmt(ms) { return (ms / 1000).toFixed(1) + 's'; }
+      function hasStored() { try { return localStorage.getItem(KEY_MS) !== null; } catch (e) { return false; } }
+      function ensureRow() {
+        if (document.getElementById(id)) return;
+        var at = after('osk-tw-color')();
+        if (!at) return;
+        var block = document.createElement('div');
+        block.id = id;
+        var line = document.createElement('div');
+        line.className = at.rowClass || 'flex items-center justify-between gap-2.5';
+        var name = document.createElement('div');
+        name.id = id + '-label';
+        name.className = at.nameClass || 'min-w-0 text-xs text-gray-600 dark:text-gray-400';
+        name.textContent = 'Change Interval';
+        var right = document.createElement('div');
+        right.className = 'osk-range-row';
+        var input = document.createElement('input');
+        input.type = 'range';
+        input.className = 'osk-range';
+        input.min = '0.4';
+        input.max = '10';
+        input.step = '0.1';
+        input.value = String(baseMs / 1000);
+        input.setAttribute('aria-labelledby', id + '-label');
+        var val = document.createElement('span');
+        val.className = 'osk-range-v';
+        val.textContent = fmt(baseMs);
+        var reset = document.createElement('button');
+        reset.type = 'button';
+        reset.className = 'osk-range-r';
+        reset.textContent = 'Reset';
+        reset.hidden = !hasStored();
+        input.addEventListener('input', function () {
+          var v = parseFloat(input.value);
+          baseMs = Math.round(v * 1000);
+          try { localStorage.setItem(KEY_MS, String(v)); } catch (e) {}
+          val.textContent = fmt(baseMs);
+          reset.hidden = false;
+        });
+        reset.addEventListener('click', function () {
+          try { localStorage.removeItem(KEY_MS); } catch (e) {}
+          baseMs = storedMs();
+          input.value = String(baseMs / 1000);
+          val.textContent = fmt(baseMs);
+          reset.hidden = true;
+        });
+        right.appendChild(input);
+        right.appendChild(val);
+        right.appendChild(reset);
+        line.appendChild(name);
+        line.appendChild(right);
+        var note = document.createElement('p');
+        note.className = 'mt-1.5 text-[0.6875rem] text-gray-400 dark:text-gray-600';
+        note.textContent = 'How long each thinking phrase stays on screen. Drag left for faster, right for slower.';
+        block.appendChild(line);
+        block.appendChild(note);
+        at.parent.insertBefore(block, at.before);
+      }
+      window.addEventListener('storage', function (evt) { if (evt.key === KEY_MS) baseMs = storedMs(); });
+      return { check: function () {}, ensureRow: ensureRow, apply: function () { baseMs = storedMs(); } };
+    })();
+    pickers.push(slider);
+
+    add('osk-tw-rhythm', 'owui-thinking-words-rhythm', 'data-osk-tw-rhythm', T.rhythmNames, T.fallbacks.rhythm,
+      'Change Rhythm', 'Steady changes at exactly the interval; Natural varies each phrase by up to 40%.',
+      function (shown) { return pv(shown === 'natural' ? '| || |' : '| | |', {}); }, null, 'osk-tw-interval');
+    add('osk-tw-timer', 'owui-thinking-words-timer', 'data-osk-tw-timer', T.timerNames, T.fallbacks.timer,
+      'Thinking Timer', 'Show a live seconds counter next to the words.',
+      function (shown) { return pv(shown === 'on' ? '0:07' : '\u2014', {}); }, null, 'osk-tw-rhythm');
+
+    // Console helper: window.__owuiThinkingWords.dump() prints the Thinking header HTML.
+    window.__owuiThinkingWords = {
+      dump: function () {
+        var out = [];
+        var svgs = document.querySelectorAll('button[aria-expanded] svg, .shimmer svg');
+        for (var i = 0; i < svgs.length; i++) {
+          var st = svgs[i].querySelector('style');
+          if (!st || st.textContent.indexOf('spinner_') === -1) continue;
+          var h = svgs[i].closest('button[aria-expanded]') || svgs[i].parentElement;
+          out.push(h.outerHTML.replace(/<style>[\s\S]*?<\/style>/g, '<style>\u2026</style>'));
+        }
+        console.log(out.join('\n\n') || 'No Thinking header with a spinner on screen right now.');
+        return out;
+      }
+    };
+
+    return {
+      pickers: pickers,
+      scan: sync,
+      apply: function () { pickers.forEach(function (p) { p.apply(); }); }
+    };
+  })();
+
   function ensureStyle() {
     if (document.getElementById('owui-osk-style')) return;
     var style = document.createElement('style');
@@ -1409,6 +2529,7 @@ LOADER_SCRIPT = r"""
   function decorate(host, kind) {
     if (host.classList.contains('osk-host')) return;
     host.classList.add('osk-host');
+    message.reroll();
     host.setAttribute('data-osk-kind', kind);
     var wrap = document.createElement('span');
     wrap.className = 'osk';
@@ -1423,6 +2544,7 @@ LOADER_SCRIPT = r"""
     var host = svg.parentElement;
     if (!host || svg.hasAttribute('data-osk-n')) return;
     svg.setAttribute('data-osk-n', '1');
+    think.reroll();
     var el = document.createElement('span');
     el.className = 'osk-th';
     el.setAttribute('aria-hidden', 'true');
@@ -1455,6 +2577,7 @@ LOADER_SCRIPT = r"""
       var sheet = spinners[k].querySelector('style');
       if (sheet && sheet.textContent.indexOf('spinner_') !== -1) decorateThink(spinners[k]);
     }
+    TW.scan(spinners);
     // The spinner is removed when thinking ends; drop the element we added beside it.
     var added = document.querySelectorAll('.osk-th');
     for (var m = 0; m < added.length; m++) {
@@ -1462,8 +2585,10 @@ LOADER_SCRIPT = r"""
     }
     message.check();
     think.check();
+    TW.pickers.forEach(function (p) { p.check(); });
     message.ensureRow();
     think.ensureRow();
+    TW.pickers.forEach(function (p) { p.ensureRow(); });
   }
 
   function schedule() {
@@ -1475,6 +2600,7 @@ LOADER_SCRIPT = r"""
   ensureStyle();
   message.apply();
   think.apply();
+  TW.apply();
   new MutationObserver(schedule).observe(ROOT, { childList: true, subtree: true });
   schedule();
 })();
@@ -1485,11 +2611,58 @@ class Event:
     class Valves(BaseModel):
         default_style: STYLE_LITERAL = Field(
             default="default",
-            description="What Default means in the Message Loading Indicator setting for users who have not picked a style. 'default' keeps Open WebUI's own indicator. Others: cursor, dot, bars (legacy loading bars), block (terminal block cursor), typing, wave (equalizer), spinner, shimmer (skeleton lines), ellipsis, scanner, orbit, ripple, breathe (breathing orb), grid (dot grid), flip (flipping square), sparkle, heartbeat, ball (bouncing ball).",
+            description="What Default means in the Message Loading Indicator setting for users who have not picked a style. 'default' keeps Open WebUI's own indicator and 'random' picks a different style for every message. Others: cursor, dot, bars (legacy loading bars), block (terminal block cursor), typing, wave (equalizer), spinner, shimmer (skeleton lines), ellipsis, scanner, orbit, ripple, breathe (breathing orb), grid (dot grid), flip (flipping square), sparkle, heartbeat, ball (bouncing ball).",
         )
         default_thinking_style: THINK_LITERAL = Field(
             default="default",
             description="What Default means in the Thinking Indicator setting, the icon beside the Thinking header while a model reasons. 'default' keeps Open WebUI's own spinner and 'none' hides the icon. The other values match the message styles of the same name.",
+        )
+
+        default_thinking_words: TW_PACK_LITERAL = Field(
+            default="claude",
+            description="What Default means in the Thinking Words setting (the rotating words that replace the plain 'Thinking...' label). Packs: claude, dev, playful, science, hacker, zen, minimal, mix (everything), custom (uses custom_words below). 'off' keeps Open WebUI's original text.",
+        )
+        default_words_effect: TW_FX_LITERAL = Field(
+            default="shimmer",
+            description="Default animation for the thinking words: random (changes every phrase), shimmer, gradient, rainbow, neon, glow, fade, slide, typewriter, scramble, blur, wave, bounce, cascade, glitch, pop, flip, reveal, pulse, plain.",
+        )
+        default_words_font: TW_FONT_LITERAL = Field(
+            default="theme",
+            description="Default font for the thinking words: random, theme, mono, serif, italic, rounded, hand, caps, small.",
+        )
+        default_words_color: TW_COLOR_LITERAL = Field(
+            default="orange",
+            description="Default color for the thinking words: random (changes every phrase), theme, orange, blue, purple, green, pink, gold, cyan, aurora, sunset.",
+        )
+        default_words_interval: float = Field(
+            default=2.4,
+            ge=0.4,
+            le=15.0,
+            description="Default seconds each thinking phrase stays on screen. Users can change it with the slider in Settings > Interface.",
+        )
+        default_words_rhythm: TW_RHYTHM_LITERAL = Field(
+            default="steady",
+            description="'steady' changes phrases at exactly the interval; 'natural' varies each one by up to 40%.",
+        )
+        default_words_timer: Literal["off", "on"] = Field(
+            default="off",
+            description="Default for the live seconds counter shown next to the thinking words.",
+        )
+        words_order: Literal["shuffle", "sequential"] = Field(
+            default="shuffle",
+            description="'shuffle' plays every word once in random order before repeating; 'sequential' plays them in list order.",
+        )
+        animated_dots: bool = Field(
+            default=True,
+            description="Show animated trailing dots after each thinking word.",
+        )
+        custom_words: str = Field(
+            default="",
+            description="Your own thinking words, one per line. Used by the 'Custom' pack (and falls back to Claude-style when empty).",
+        )
+        label_pattern: str = Field(
+            default="thinking|reasoning",
+            description="Regex (case-insensitive) matching the start of Open WebUI's thinking label. Add your UI language here, e.g. 'thinking|reasoning|pensando|denkt'. Only labels that match are replaced.",
         )
 
     LOADER_BLOCK_START = "// owui-message-loading-indicator:start"
@@ -1505,17 +2678,48 @@ class Event:
         Event.instance = self
         reload_bootstrap()
 
+    def _custom_words(self) -> list:
+        lines = [ln.strip() for ln in (self.valves.custom_words or "").splitlines()]
+        return [ln[:60] for ln in lines if ln][:200]
+
     def _loader_fragment(self) -> str:
-        cache_key = (self.valves.default_style, self.valves.default_thinking_style)
+        valves = self.valves
+        dump = valves.model_dump() if hasattr(valves, "model_dump") else valves.dict()
+        cache_key = _json.dumps(dump, sort_keys=True, default=str)
         cached = Event._fragment_cache
         if cached and cached[0] == cache_key:
             return cached[1]
         config = _json.dumps(
             {
-                "fallback": self.valves.default_style,
-                "thinkFallback": self.valves.default_thinking_style,
+                "fallback": valves.default_style,
+                "thinkFallback": valves.default_thinking_style,
                 "names": STYLE_NAMES,
                 "thinkNames": THINK_NAMES,
+                "tw": {
+                    "packs": TW_PACKS,
+                    "custom": self._custom_words(),
+                    "order": valves.words_order,
+                    "dots": bool(valves.animated_dots),
+                    "pattern": valves.label_pattern or "thinking|reasoning",
+                    "glyphs": TW_GLYPHS,
+                    "fxPool": TW_FX_POOL,
+                    "fontPool": TW_FONT_POOL,
+                    "interval": float(valves.default_words_interval),
+                    "packNames": TW_PACK_NAMES,
+                    "fxNames": TW_FX_NAMES,
+                    "fontNames": TW_FONT_NAMES,
+                    "colorNames": TW_COLOR_NAMES,
+                    "rhythmNames": TW_RHYTHM_NAMES,
+                    "timerNames": TW_TIMER_NAMES,
+                    "fallbacks": {
+                        "pack": valves.default_thinking_words,
+                        "fx": valves.default_words_effect,
+                        "font": valves.default_words_font,
+                        "color": valves.default_words_color,
+                        "rhythm": valves.default_words_rhythm,
+                        "timer": valves.default_words_timer,
+                    },
+                },
             }
         )
         js = (
