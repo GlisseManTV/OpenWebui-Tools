@@ -1284,208 +1284,278 @@ def _build_generated_css() -> str:
 
 # ---------------------------------------------------------------------------
 # 2.0.0: Thinking Words. Replaces the "Thinking..." label with rotating words.
+# 2.6.0: i18n refactor -> single compact pipe-delimited source (TW_PACKS_RAW).
 # ---------------------------------------------------------------------------
-TW_PACKS = {
-    "claude": [
-        "Thinking this through",
-        "Going over the details",
-        "Pondering",
-        "Trying harder",
-        "Mulling it over",
-        "Connecting the dots",
-        "Chewing on that",
-        "Weighing options",
-        "Digging deeper",
-        "Untangling this",
-        "Cooking up an answer",
-        "Working it out",
-        "Reading between the lines",
-        "Considering angles",
-        "Double-checking",
-        "Sharpening the answer",
-        "Almost there",
-        "Gathering my thoughts",
-        "Turning it over",
-        "Following the thread",
-        "Getting to the bottom of it",
-        "Looking at the big picture",
-        "Breaking it down",
-        "Piecing it together",
-        "Taking a closer look",
-        "Exploring possibilities",
-        "Checking my reasoning",
-        "Putting it all together",
-        "Examining the evidence",
-        "Sorting through ideas",
-        "Connecting the pieces",
-        "Thinking it over",
-        "Giving this some thought",
-        "Reflecting on this",
-        "Analyzing the question",
-        "Looking at it from every side",
-        "Trying another angle",
-        "Working through the logic",
-        "Making sense of it",
-        "Searching my memory",
-        "Narrowing it down",
-        "Drawing conclusions",
-        "Crafting a response",
-        "Organizing my thoughts",
-        "Finding the right words",
-        "Refining the answer",
-        "Polishing things up",
-        "Checking the facts",
-        "Considering the options",
-        "Balancing the details",
-        "Looking deeper",
-        "Thinking carefully",
-        "Giving it my full attention",
-        "Doing the heavy lifting",
-        "Running through scenarios",
-        "Testing a few ideas",
-        "Zooming in",
-        "Zooming out",
-        "Rethinking this",
-        "Second-guessing myself",
-        "Making a plan",
-        "Mapping it out",
-        "Laying it all out",
-        "Digesting this",
-        "Absorbing the details",
-        "Reading it again",
-        "Taking it step by step",
-        "Thinking out loud",
-        "Thinking really hard",
-        "Brainstorming",
-        "Deliberating",
-        "Contemplating",
-        "Ruminating",
-        "Cogitating",
-        "Noodling on it",
-        "Wrestling with this",
-        "Doing some mental math",
-        "Building the answer",
-        "Assembling my thoughts",
-        "Looking for the best approach",
-        "Choosing my words",
-        "Picking the best answer",
-        "Putting in the effort",
-        "Thinking deeply",
-        "Staying with it",
-        "Going the extra mile",
-        "Making sure it is right",
-        "Cross-checking",
-        "Reviewing my notes",
-        "Sketching it out",
-        "Finding the pattern",
-        "Spotting the catch",
-        "Tracing the logic",
-        "Chasing an idea",
-        "Catching a thought",
-        "Letting ideas simmer",
-        "Warming up",
-        "Getting my bearings",
-        "Gaining clarity",
-        "Seeing the whole picture",
-        "Getting the details right",
-        "Tying up loose ends",
-        "Weaving it together",
-        "Pulling it together",
-        "Fine-tuning",
-        "One moment",
-        "Hang tight",
-        "Bear with me",
-        "Just a sec",
-        "Working on it",
-        "Give me a moment",
-        "Deep in thought",
-        "Lost in thought",
-        "Wheels turning",
-        "Gears turning",
-        "Brain whirring",
-        "Neurons firing",
-        "Lightbulb loading",
-        "Coming up with something good",
+LANG_ORDER = ["en", "fr", "es", "de", "nl"]  # 1st segment = English (fallback)
+TW_SEG_SEP = "|"
+
+# Compact i18n source. Each pack phrase is ONE pipe-delimited line:
+#   "english|french|spanish|german|dutch"
+# Each label is {english_key: "french|spanish|german|dutch"} (English is the key).
+# To add a language: append its segment to every line and extend LANG_ORDER.
+# An empty segment means "no translation for that language".
+
+def _expand_pack(packs_raw, lang_order):
+    """Return (en_dict, i18n_dict) from compact pipe-delimited pack lines.
+
+    en_dict:   {pack: [english words]}
+    i18n_dict: {lang: {pack: [words]}} for non-English langs.
+    A language's list is index-aligned with the English list; an empty segment
+    means that phrase is not translated in that language and is OMITTED from
+    that language's deck (this preserves the original per-language deck sizes,
+    e.g. Dutch intentionally ships fewer phrases than English).
+    """
+    en_dict = {}
+    i18n_dict = {}
+    for pack, rows in packs_raw.items():
+        en_dict[pack] = [r.split(TW_SEG_SEP)[0] for r in rows]
+        for li, lang in enumerate(lang_order):
+            if li == 0:
+                continue  # English handled above
+            words = []
+            for r in rows:
+                segs = r.split(TW_SEG_SEP)
+                seg = segs[li] if li < len(segs) else ""
+                if seg:
+                    words.append(seg)
+            if words:
+                i18n_dict.setdefault(lang, {})[pack] = words
+    return en_dict, i18n_dict
+
+
+def _expand_labels(labels_raw, lang_order):
+    """Return {lang: {english_key: translated_value}} from compact labels.
+
+    labels_raw: {english_key: "fr|es|de|nl"} (English is the key, not a segment).
+    A language appears only if it has at least one non-empty segment. Within a
+    present language, an empty segment falls back to the English key.
+    """
+    out = {}
+    langs = lang_order[1:]  # skip English
+    for li, lang in enumerate(langs):
+        present = any(
+            (v.split(TW_SEG_SEP)[li] if li < len(v.split(TW_SEG_SEP)) else "")
+            for v in labels_raw.values()
+        )
+        if not present:
+            continue
+        d = {}
+        for key, val in labels_raw.items():
+            segs = val.split(TW_SEG_SEP)
+            seg = segs[li] if li < len(segs) else ""
+            d[key] = seg or key
+        out[lang] = d
+    return out
+
+
+# Every phrase: "en|fr|es|de|nl". Empty tail segment = no translation.
+TW_PACKS_RAW = {
+    'claude': [
+        "Thinking this through|En train d'y réfléchir|Pensando en esto|Denke darüber nach|Aan het denken",
+        'Going over the details|Passage en revue des détails|Revisando los detalles|Gehe die Details durch|Bezig met nadenken',
+        'Pondering|Réflexion en cours|Meditando|Grüble|Bezig met reflecteren',
+        'Trying harder|Effort de concentration|Esfuerzo mental|Mühevolle Anstrengung|Informatie verzamelen',
+        'Mulling it over|Méditation sur le sujet|Dándole vueltas|Sinne darüber nach|Opties afwegen',
+        'Connecting the dots|Connexion des idées|Conectando ideas|Verbinde die Punkte|Verbanden leggen',
+        'Chewing on that|Rumination de la question|Masticando la pregunta|Käue das durch|Overwegen',
+        'Weighing options|Pondération des options|Sopesando opciones|Wäge Optionen ab|Analyseren',
+        'Digging deeper|Approfondissement|Profundizando|Grabe tiefer|',
+        'Untangling this|Démêlage de ce problème|Desenredando esto|Entwirre das|',
+        "Cooking up an answer|Préparation d'une réponse|Preparando una respuesta|Bringe eine Antwort zustande|",
+        'Working it out|Résolution en cours|Trabajando en ello|Arbeite es aus|',
+        'Reading between the lines|Lecture entre les lignes|Leyendo entre líneas|Zwischen den Zeilen lesen|',
+        'Considering angles|Étude des angles|Considerando ángulos|Betrachte Blickwinkel|',
+        'Double-checking|Vérification|Doble verificación|Doppelprüfung|',
+        'Sharpening the answer|Peaufinage de la réponse|Puliendo la respuesta|Verfeinere die Antwort|',
+        'Almost there|Presque prêt|Ya casi|Fast geschafft|',
+        'Gathering my thoughts|Rassemblement des pensées|Recogiendo pensamientos|Sammle meine Gedanken|',
+        'Turning it over|Examen sous toutes les coutures|Dándole la vuelta|Wälze das um|',
+        'Following the thread|Suivi du fil conducteur|Siguiendo el hilo|Folge dem Faden|',
+        'Getting to the bottom of it|Recherche de la solution|Llegando al fondo|Gehe der Sache auf den Grund|',
+        "Looking at the big picture|Vue d'ensemble|Viendo el panorama|Betrachte das Gesamtbild|",
+        'Breaking it down|Décomposition du problème|Desglosando|Breche es herunter|',
+        'Piecing it together|Assemblage des pièces|Ensamblando piezas|Setze die Teile zusammen|',
+        'Taking a closer look|Examen attentif|Mirando más de cerca|Siehe genauer hin|',
+        'Exploring possibilities|Exploration des possibilités|Explorando posibilidades|Erkunde Möglichkeiten|',
+        'Checking my reasoning|Vérification du raisonnement|Revisando el razonamiento|Prüfe meine Logik|',
+        'Putting it all together|Mise en commun|Uniéndolo todo|Füge alles zusammen|',
+        'Examining the evidence|Examen des indices|Examinando la evidencia|Untersuche die Hinweise|',
+        'Sorting through ideas|Tri des idées|Ordenando ideas|Sortiere Ideen|',
+        'Connecting the pieces|Reliure des éléments|Conectando piezas|Verbinde die Stücke|',
+        'Thinking it over|Réflexion approfondie|Pensándolo bien|Denke es durch|',
+        'Giving this some thought|Attention portée au sujet|Poniéndole atención|Schenke dem Beachtung|',
+        'Reflecting on this|Méditation sur ce point|Reflexionando sobre esto|Sinniere darüber|',
+        'Analyzing the question|Analyse de la question|Analizando la pregunta|Analysiere die Frage|',
+        'Looking at it from every side|Étude sous chaque angle|Mirándolo desde todos los lados|Betrachte von jeder Seite|',
+        "Trying another angle|Essai d'une autre approche|Probando otro ángulo|Versuche einen anderen Winkel|",
+        'Working through the logic|Travail logique|Trabajando la lógica|Arbeite die Logik durch|',
+        'Making sense of it|Donner du sens|Dándole sentido|Bringe Sinn hinein|',
+        'Searching my memory|Recherche en mémoire|Buscando en mi memoria|Suche in meiner Erinnerung|',
+        'Narrowing it down|Affinage|Acotando|Grenze ein|',
+        'Drawing conclusions|Tirage de conclusions|Sacando conclusiones|Ziehe Schlüsse|',
+        'Crafting a response|Rédaction de la réponse|Redactando la respuesta|Formuliere eine Antwort|',
+        'Organizing my thoughts|Organisation des pensées|Organizando mis pensamientos|Organisiere meine Gedanken|',
+        'Finding the right words|Trouver les bons mots|Buscando las palabras correctas|Finde die richtigen Worte|',
+        'Refining the answer|Raffinement de la réponse|Refinando la respuesta|Verfeinere die Antwort|',
+        'Polishing things up|Polissage|Puliendo detalles|Poliere auf|',
+        'Checking the facts|Vérification des faits|Verificando hechos|Prüfe die Fakten|',
+        'Considering the options|Étude des options|Considerando opciones|Berücksichtige Optionen|',
+        'Balancing the details|Équilibrage des détails|Equilibrando detalles|Balanciere die Details|',
+        'Looking deeper|Approfondissement|Mirando más profundo|Blicke tiefer|',
+        'Thinking carefully|Réflexion soignée|Pensando con cuidado|Denke sorgfältig|',
+        'Giving it my full attention|Attention totale|Poniendo toda la atención|Volle Aufmerksamkeit|',
+        'Doing the heavy lifting|Travail de fond|Haciendo el trabajo duro|Harte Arbeit|',
+        'Running through scenarios|Simulation de scénarios|Recorriendo escenarios|Spiele Szenarien durch|',
+        "Testing a few ideas|Test d'idées|Probando ideas|Teste Ideen|",
+        'Zooming in|Zoom avant|Acercando|Hereinzoomen|',
+        'Zooming out|Zoom arrière|Alejando|Herauszoomen|',
+        'Rethinking this|Remise en question|Repensando esto|Überdenke das|',
+        'Second-guessing myself|Auto-doute|Dudando de mí mismo|Selbstzweifel|',
+        "Making a plan|Élaboration d'un plan|Haciendo un plan|Erstelle einen Plan|",
+        'Mapping it out|Cartographie|Mapeando|Karte es auf|',
+        'Laying it all out|Exposition complète|Exponiendo todo|Lege alles dar|',
+        "Digesting this|Digestion de l'info|Digiriendo esto|Verdaue das|",
+        'Absorbing the details|Absorption des détails|Absorbiendo detalles|Nehme Details auf|',
+        'Reading it again|Relecture|Releyendo|Lese erneut|',
+        'Taking it step by step|Étape par étape|Paso a paso|Schritt für Schritt|',
+        'Thinking out loud|Pensée à voix haute|Pensando en voz alta|Denke laut|',
+        'Thinking really hard|Effort intellectuel|Pensando muy fuerte|Denke sehr hart|',
+        'Brainstorming|Brainstorming|Lluvia de ideas|Brainstorming|',
+        'Deliberating|Délibération|Deliberando|Berate|',
+        'Contemplating|Contemplation|Contemplando|Sinniere|',
+        'Ruminating|Rumination|Rumiando|Grüble nach|',
+        'Cogitating|Cogitation|Cogitando|Kopfrechnen|',
+        'Noodling on it|Élaboration tranquille|Dándole al coco|Sinne ruhig darüber nach|',
+        'Wrestling with this|Lutte avec le problème|Luchando con esto|Ringe mit dem Problem|',
+        'Doing some mental math|Calcul mental|Haciendo cuentas|Kopfrechnen|',
+        'Building the answer|Construction de la réponse|Construyendo la respuesta|Baue die Antwort|',
+        'Assembling my thoughts|Assemblage des pensées|Ensamblando pensamientos|Setze Gedanken zusammen|',
+        'Looking for the best approach|Recherche de la meilleure approche|Buscando el mejor enfoque|Suche den besten Ansatz|',
+        'Choosing my words|Choix des mots|Eligiendo palabras|Wähle meine Worte|',
+        'Picking the best answer|Sélection de la meilleure réponse|Escogiendo la mejor respuesta|Wähle die beste Antwort|',
+        'Putting in the effort|Effort soutenu|Poniendo esfuerzo|Gib Mühe|',
+        'Thinking deeply|Pensée profonde|Pensando a fondo|Denke tiefgründig|',
+        'Staying with it|Persévérance|Siguiendo con ello|Bleibe dran|',
+        'Going the extra mile|Excellence|Dando un paso más|Gehe die Extrameile|',
+        'Making sure it is right|Vérification de justesse|Asegurando que esté bien|Stelle sicher, dass es stimmt|',
+        'Cross-checking|Double vérification|Contraverificación|Kreuzprüfung|',
+        'Reviewing my notes|Revue des notes|Revisando mis notas|Überprüfe meine Notizen|',
+        'Sketching it out|Esquisse|Bocetando|Skizziere es|',
+        'Finding the pattern|Détection du motif|Encontrando el patrón|Finde das Muster|',
+        'Spotting the catch|Repérage du piège|Detectando la trampa|Erkenne den Haken|',
+        'Tracing the logic|Suivi de la logique|Siguiendo la lógica|Verfolge die Logik|',
+        "Chasing an idea|Poursuite d'une idée|Persiguiendo una idea|Jage einer Idee nach|",
+        "Catching a thought|Saisie d'une pensée|Captando un pensamiento|Fange einen Gedanken|",
+        'Letting ideas simmer|Laisser mijoter|Dejando reposar|Lass Ideen ziehen|',
+        'Warming up|Échauffement|Entrando en calor|Aufwärmen|',
+        'Getting my bearings|Prise de repères|Orientándome|Orientiere mich|',
+        'Gaining clarity|Gain de clarté|Ganando claridad|Gewinne Klarheit|',
+        'Seeing the whole picture|Vision globale|Viendo el cuadro completo|Sehe das ganze Bild|',
+        'Getting the details right|Précision des détails|Cuidando los detalles|Bringe Details richtig|',
+        'Tying up loose ends|Finitions|Atando cabos|Verknüpfe lose Enden|',
+        'Weaving it together|Tissage|Tejiendo|Verwebe es|',
+        'Pulling it together|Rassemblement|Uniéndolo|Füge es zusammen|',
+        'Fine-tuning|Ajustement fin|Ajustando|Feinabstimmung|',
+        'One moment|Un instant|Un momento|Einen Moment|',
+        'Hang tight|Patience|Espera|Geduld|',
+        'Bear with me|Encore un peu|Ten paciencia|Hab Geduld|',
+        'Just a sec|Juste une seconde|Un segundito|Nur eine Sekunde|',
+        'Working on it|Travail en cours|Trabajando en ello|Arbeite daran|',
+        'Give me a moment|Un moment svp|Dame un momento|Gib mir einen Moment|',
+        'Deep in thought|Absorbé par la réflexion|En profundas reflexiones|Vertieft in Gedanken|',
+        'Lost in thought|Perdu dans mes pensées|Perdido en mis pensamientos|Versunken in Gedanken|',
+        'Wheels turning|Rouages en marche|Engranajes girando|Räder drehen sich|',
+        'Gears turning|Engrenages actifs|Ruedas en movimiento|Zahnräder laufen|',
+        'Brain whirring|Cerveau en ébullition|Cerebro zumbando|Gehirn surrt|',
+        'Neurons firing|Neurones en action|Neuronas disparando|Neuronen feuern|',
+        'Lightbulb loading|Ampoule en chargement|Bombilla cargando|Glühbirne lädt|',
+        'Coming up with something good|Préparation de quelque chose de bien|Algo bueno se acerca|Etwas Gutes entsteht|',
     ],
-    "dev": [
-        "Fixing bugs",
-        "Compiling thoughts",
-        "Refactoring ideas",
-        "Reading the docs",
-        "Rubber-ducking",
-        "Running tests",
-        "Resolving merge conflicts",
-        "Grepping my memory",
-        "Optimizing",
-        "Checking edge cases",
-        "Linting my thoughts",
-        "Clearing the cache",
-        "Reviewing the diff",
-        "Writing a unit test",
-        "Stack Overflow-ing",
-        "Deploying an answer",
-        "Squashing commits",
-        "Profiling the problem",
-        "Blaming the cache",
-        "Shipping it",
+    'dev': [
+        'Fixing bugs|Correction de bugs|Arreglando bugs|Behebe Bugs|Berekenen',
+        'Compiling thoughts|Compilation des pensées|Compilando pensamientos|Kompiliere Gedanken|Logica controleren',
+        "Refactoring ideas|Refactoring d'idées|Refactorizando ideas|Refactoring von Ideen|Variabelen invullen",
+        'Reading the docs|Lecture de la doc|Leyendo los docs|Lese die Doku|Cache lezen',
+        'Rubber-ducking|Canard en plastique|Pato de goma|Gummientente|Data verwerken',
+        'Running tests|Lancement des tests|Ejecutando tests|Führe Tests aus|Indexeren',
+        'Resolving merge conflicts|Résolution de conflits git|Resolviendo conflictos git|Löse Merge-Konflikte|',
+        'Grepping my memory|grep de ma mémoire|grep de mi memoria|grep mein Gedächtnis|',
+        'Optimizing|Optimisation|Optimizando|Optimiere|',
+        'Checking edge cases|Vérification des cas limites|Revisando casos límite|Prüfe Randfälle|',
+        'Linting my thoughts|Lint de mes pensées|Lint de mis pensamientos|Lint meine Gedanken|',
+        'Clearing the cache|Vidage du cache|Limpiando la caché|Leere den Cache|',
+        'Reviewing the diff|Revue du diff|Revisando el diff|Reviewe den Diff|',
+        "Writing a unit test|Écriture d'un test unitaire|Escribiendo un test unitario|Schreibe einen Unit-Test|",
+        'Stack Overflow-ing|Stack Overflow|Stack Overflow|Stack Overflow|',
+        'Deploying an answer|Déploiement de la réponse|Desplegando una respuesta|Deploye eine Antwort|',
+        'Squashing commits|Squash de commits|Squashing commits|Squashe Commits|',
+        'Profiling the problem|Profilage du problème|Profileando el problema|Profile das Problem|',
+        "Blaming the cache|C'est la faute du cache|Culpa de la caché|Schuld ist der Cache|",
+        'Shipping it|En production|A producción|Ab damit|',
     ],
-    "playful": [
-        "Consulting the oracle",
-        "Asking the hamsters",
-        "Herding thoughts",
-        "Warming up brain cells",
-        "Summoning wisdom",
-        "Shuffling neurons",
-        "Polishing the crystal ball",
-        "Feeding the gremlins",
-        "Stretching synapses",
-        "Brewing coffee for neurons",
-        "Doing mental gymnastics",
-        "Waking the wizards",
-        "Spinning the wheel",
-        "Poking the idea box",
-        "Tickling the hamster wheel",
-        "Cracking knuckles",
+    'playful': [
+        "Consulting the oracle|Consultation de l'oracle|Consultando al oráculo|Befrage das Orakel|Hersenen opwarmen",
+        'Asking the hamsters|Demande aux hamsters|Preguntando a los hámsteres|Frage die Hamster|Tandwielen draaien',
+        'Herding thoughts|Rassemblement des pensées|Pastoreando pensamientos|Hüte meine Gedanken|Even denken…',
+        'Warming up brain cells|Réchauffement des neurones|Calentando neuronas|Wärme Gehirnzellen auf|Brein aan het werk',
+        'Summoning wisdom|Invocation de sagesse|Invocando sabiduría|Beschwöre Weisheit|Synapsen knetteren',
+        'Shuffling neurons|Mélange des neurones|Barajando neuronas|Mische Neuronen|',
+        'Polishing the crystal ball|Polissage de la boule de cristal|Puliendo la bola de cristal|Poliere die Kristallkugel|',
+        'Feeding the gremlins|Nourrissage des gremlins|Alimentando gremlins|Füttere die Gremlins|',
+        'Stretching synapses|Étirement des synapses|Estirando sinapsis|Dehne Synapsen|',
+        'Brewing coffee for neurons|Café pour neurones|Café para neuronas|Kaffee für Neuronen|',
+        'Doing mental gymnastics|Gymnastique mentale|Gimnasia mental|Mentale Gymnastik|',
+        'Waking the wizards|Réveil des sorciers|Despertando a los magos|Wecke die Zauberer|',
+        'Spinning the wheel|Rotation de la roue|Girando la ruleta|Drehe das Rad|',
+        'Poking the idea box|Chatouillage de la boîte à idées|Haciendo cosquillas a la caja de ideas|Kitzle die Ideenbox|',
+        'Tickling the hamster wheel|Faire craquer les jointures|Crujiendo nudillos|Knacke mit den Fingern|',
+        'Cracking knuckles||||',
     ],
-    "science": [
-        "Running the numbers",
-        "Formulating hypotheses",
-        "Calibrating",
-        "Simulating outcomes",
-        "Cross-referencing",
-        "Testing theories",
-        "Measuring twice",
-        "Crunching data",
-        "Peer reviewing myself",
-        "Isolating variables",
-        "Balancing the equation",
-        "Observing patterns",
+    'science': [
+        'Running the numbers|Calcul des chiffres|Calculando números|Berechne Zahlen|Hypothesen toetsen',
+        "Formulating hypotheses|Formulation d'hypothèses|Formulando hipótesis|Formuliere Hypothesen|Data analyseren",
+        'Calibrating|Calibrage|Calibrando|Kalibriere|Variabelen wegen',
+        'Simulating outcomes|Simulation de résultats|Simulando resultados|Simuliere Ergebnisse|Patronen herkennen',
+        'Cross-referencing|Recoupement|Contrastando|Kreuzreferenziere|Experiment uitvoeren',
+        'Testing theories|Test de théories|Probando teorías|Teste Theorien|',
+        'Measuring twice|Double mesure|Midiendo dos veces|Zweimal messen|',
+        'Crunching data|Traitement de données|Procesando datos|Verarbeite Daten|',
+        'Peer reviewing myself|Revue par les pairs interne|Revisión de pares interna|Peer-Review im Kopf|',
+        'Isolating variables|Isolation des variables|Aislando variables|Isoliere Variablen|',
+        "Balancing the equation|Équilibrage de l'équation|Equilibrando la ecuación|Balanciere die Gleichung|",
+        'Observing patterns|Observation de motifs|Observando patrones|Beobachte Muster|',
     ],
-    "hacker": [
-        "Initializing neural net",
-        "Decrypting the question",
-        "Parsing intent",
-        "Allocating brain",
-        "Handshaking with logic",
-        "Booting reasoning core",
-        "Tracing the stack",
-        "Injecting insight",
-        "Compiling answer",
-        "Bypassing the obvious",
-        "Sudo thinking",
-        "Opening a root shell",
+    'hacker': [
+        'Initializing neural net|Initialisation du réseau neuronal|Inicializando red neuronal|Initialisiere neuronales Netz|Denkproces initialiseren',
+        'Decrypting the question|Déchiffrement de la question|Descifrando la pregunta|Entschlüssele die Frage|Inference starten',
+        "Parsing intent|Analyse de l'intention|Parseando intención|Parse Intent|Neurale lagen activeren",
+        'Allocating brain|Allocation de cerveau|Asignando cerebro|Allokiere Gehirn|Tokens verwerken',
+        'Handshaking with logic|Poignée de main logique|Handshake con la lógica|Handshake mit Logik|Context laden',
+        'Booting reasoning core|Démarrage du noyau de raisonnement|Arrancando núcleo de razonamiento|Starte Reasoning-Kern|',
+        'Tracing the stack|Trace de la stack|Trazeando la stack|Trace den Stack|',
+        "Injecting insight|Injection d'insight|Inyectando insight|Injiziere Insight|",
+        'Compiling answer|Compilation de la réponse|Compilando respuesta|Kompiliere Antwort|',
+        "Bypassing the obvious|Contournement de l'évident|Evitando lo obvio|Umgehe das Offensichtliche|",
+        'Sudo thinking|sudo réfléchir|sudo pensar|sudo denken|',
+        "Opening a root shell|Ouverture d'un shell root|Abriendo shell root|Öffne Root-Shell|",
     ],
-    "zen": [
-        "Breathing",
-        "Finding clarity",
-        "Letting it settle",
-        "Taking a moment",
-        "Focusing",
-        "Seeking balance",
-        "Quieting the noise",
-        "Listening closely",
+    'zen': [
+        'Breathing|Respiration|Respirando|Atme|Ademhalen',
+        'Finding clarity|Recherche de clarté|Encontrando claridad|Finde Klarheit|Laat het zakken',
+        'Letting it settle|Laisser décanter|Dejando asentar|Lass es sich setzen|Stilte…',
+        'Taking a moment|Prendre un moment|Tomándome un momento|Nimm dir einen Moment|In de flow',
+        'Focusing|Concentration|Enfocándome|Fokussiere|Laten stromen',
+        "Seeking balance|Recherche d'équilibre|Buscando equilibrio|Suche Balance|",
+        'Quieting the noise|Apaisement du bruit|Silenciando el ruido|Stille das Rauschen|',
+        'Listening closely|Écoute attentive|Escuchando atentamente|Höre aufmerksam zu|',
     ],
-    "minimal": ["Thinking", "Reasoning", "Working", "Processing", "Considering"],
+    'minimal': [
+        'Thinking|Réflexion|Pensando|Denke|Denken…',
+        'Reasoning|Raisonnement|Razonando|Logik|Nadenken…',
+        'Working|Traitement|Trabajando|Arbeite|Wachten…',
+        'Processing|Analyse|Procesando|Verarbeite|Bezig…',
+        'Considering|Étude|Considerando|Prüfe|Denkt…',
+    ],
 }
 
 TW_PACK_NAMES = {
@@ -1646,6 +1716,145 @@ TW_RHYTHM_NAMES = {
     "natural": "Natural (varies +/-40%)",
 }
 TW_TIMER_NAMES = {"default": "Default", "off": "Off", "on": "Show seconds"}
+
+# ---------------------------------------------------------------------------
+# 2.5.0: i18n — translations for all user-facing labels in the injected UI.
+# Keys match the English originals; values are per-language dicts.
+# ---------------------------------------------------------------------------
+# {english_key: "fr|es|de|nl"}
+I18N_UI_RAW = {
+    'Message Loading Indicator': 'Indicateur de chargement|Indicador de carga|Nachrichten-Ladeanzeige|Indicator bericht laden',
+    'How a reply shows that it is still loading. Saved in this browser.': "Comment une réponse indique qu'elle est encore en cours de chargement. Sauvegardé dans ce navigateur.|Cómo una respuesta indica que aún se está cargando. Guardado en este navegador.|Wie eine Antwort anzeigt, dass sie noch lädt. In diesem Browser gespeichert.|Hoe een antwoord aangeeft dat het nog laadt. Opgeslagen in deze browser.",
+    'Thinking Indicator': 'Indicateur de réflexion|Indicador de razonamiento|Denkanzeige|Denkindicator',
+    'The icon beside the Thinking header while a model reasons. Saved in this browser.': "L'icône à côté de l'en-tête Réflexion pendant que le modèle raisonne. Sauvegardé dans ce navigateur.|El icono junto al encabezado Razonamiento mientras el modelo razona. Guardado en este navegador.|Das Symbol neben dem Denken-Header, während ein Modell überlegt. In diesem Browser gespeichert.|Het icoon naast de Denken-header terwijl een model redeneert. Opgeslagen in deze browser.",
+    'Thinking Words': 'Mots de réflexion|Palabras de razonamiento|Denkwörter|Denkwoorden',
+    'Rotating words shown instead of the plain “Thinking…” label while a model reasons. Saved in this browser.': 'Mots rotatifs affichés à la place du libellé « Réflexion… » pendant que le modèle raisonne. Sauvegardé dans ce navigateur.|Palabras rotativas en lugar de la etiqueta «Razonando…» mientras el modelo razona. Guardado en este navegador.|Rotierende Wörter statt der Beschriftung „Denkt nach…“, während ein Modell überlegt. In diesem Browser gespeichert.|Roterende woorden in plaats van het label “Aan het denken…” terwijl een model redeneert. Opgeslagen in deze browser.',
+    'Thinking label': 'Libellé Réflexion|Etiqueta Razonamiento|Denken-Beschriftung|Denken-label',
+    'Phrase Effect': 'Effet de phrase|Efecto de frase|Phraseneffekt|Zinseffect',
+    'How each phrase animates in. Random picks a different effect every time the phrase changes.': 'Animation de chaque phrase. Aléatoire choisit un effet différent à chaque changement.|Cómo se anima cada frase. Aleatorio elige un efecto diferente en cada cambio.|Wie jede Phrase animiert wird. Zufällig wählt bei jedem Wechsel einen anderen Effekt.|Hoe elke zin animeert. Willekeurig kiest bij elke wissel een ander effect.',
+    'Phrase Font': 'Police de phrase|Fuente de frase|Phrasenschrift|Zinlettertype',
+    'Typeface for the thinking phrases (fonts already on your device).': 'Police des phrases de réflexion (polices déjà sur votre appareil).|Tipografía de las frases de razonamiento (fuentes ya en tu dispositivo).|Schriftart für Denkphrasen (Bereits auf Ihrem Gerät vorhandene Schriften).|Lettertype voor de denkzinnen (lettertypen al op uw apparaat).',
+    'Phrase Color': 'Couleur de phrase|Color de frase|Pharbenfarbe|Zinskleur',
+    'Color or gradient of the thinking phrases.': 'Couleur ou dégradé des phrases de réflexion.|Color o degradado de las frases de razonamiento.|Farbe oder Verlauf der Denkphrasen.|Kleur of verloop van de denkzinnen.',
+    'Change Interval': 'Intervalle de changement|Intervalo de cambio|Wechselintervall|Wisselinterval',
+    'How long each thinking phrase stays on screen. Drag left for faster, right for slower.': "Durée d'affichage de chaque phrase. Glissez à gauche pour accélérer, à droite pour ralentir.|Duración de cada frase en pantalla. Arrastra a la izquierda para acelerar, a la derecha para ralentizar.|Wie lange jede Denkphrase angezeigt wird. Nach links für schneller, nach rechts für langsamer.|Hoe lang elke denkzin op scherm blijft. Sleep naar links voor sneller, rechts voor langzamer.",
+    'Reset': 'Réinitialiser|Restablecer|Zurücksetzen|Herstel',
+    'Custom Color': 'Couleur personnalisée|Color personalizado|Eigene Farbe|Aangepaste kleur',
+    'Pick any color, then choose “Custom” in Phrase Color above to use it.': 'Choisissez une couleur, puis sélectionnez « Personnalisée » dans Couleur de phrase ci-dessus.|Elige un color, luego selecciona «Personalizado» en Color de frase arriba.|Wählen Sie eine Farbe, dann „Eigene“ bei Pharbenfarbe oben.|Kies een kleur, selecteer daarna “Aangepast” bij Zinskleur hierboven.',
+    'Change Rhythm': 'Rythme de changement|Ritmo de cambio|Wechselrhythmus|Wisselritme',
+    'Steady changes at exactly the interval; Natural varies each phrase by up to 40%.': "Régulier : changement exact à l'intervalle ; Naturel : varie chaque phrase de 40% max.|Constante cambia exactamente en el intervalo; Natural varía cada frase hasta un 40%.|Gleichmäßig wechselt genau im Intervall; Natürlich variiert jede Phrase um bis zu 40%.|Gelijkmatig wisselt exact op het interval; Natuurlijk varieert elke zin tot 40%.",
+    'Thinking Timer': 'Minuteur de réflexion|Temporizador de razonamiento|Denk-Timer|Denk-timer',
+    'Show a live seconds counter next to the words.': 'Affiche un compteur de secondes en direct à côté des mots.|Muestra un contador de segundos en vivo junto a las palabras.|Zeigt einen Live-Sekundenzähler neben den Wörtern an.|Toon een live secondenteller naast de woorden.',
+}
+
+I18N_PACK_NAMES_RAW = {
+    'default': 'Par défaut|Por defecto|Standard|Standaard',
+    'off': 'Original « Pensée… »|Original «Pensando…»|Original „Denkt nach…“|Origineel “Aan het denken…”',
+    'claude': 'Style Claude|Estilo Claude|Claude-Stil|Claude-stijl',
+    'dev': 'Dev & Debug|Dev & Debug|Dev & Debug|Dev & Debug',
+    'playful': 'Ludique|Divertido|Verspielt|Speels',
+    'science': 'Labo scientifique|Laboratorio|Wissenschaftslabor|Wetenschapslab',
+    'hacker': 'Terminal Hacker|Terminal Hacker|Hacker-Terminal|Hacker-terminal',
+    'zen': 'Zen|Zen|Zen|Zen',
+    'minimal': 'Minimal|Mínimo|Minimal|Minimaal',
+    'mix': 'Mélange aléatoire (tous packs)|Mezcla aleatoria (todos)|Zufallsmix (alle Packs)|Willekeurige mix (alle packs)',
+    'custom': 'Personnalisé (liste admin)|Personalizado (lista admin)|Eigene (Admin-Liste)|Aangepast (adminlijst)',
+}
+
+I18N_FX_NAMES_RAW = {
+    'default': 'Par défaut|Por defecto|Standard|',
+    'random': 'Aléatoire (change à chaque phrase)|Aleatorio (cambia en cada frase)|Zufällig (wechselt bei jeder Phrase)|',
+    'shimmer': 'Balayage lumineux|Barrido brillante|Schimmer-Sweep|',
+    'gradient': 'Dégradé fluide|Degradado fluido|Farbverlauf|',
+    'rainbow': 'Arc-en-ciel|Arcoíris|Regenbogen|',
+    'neon': 'Néon clignotant|Neón parpadeante|Neon-Flackern|',
+    'glow': 'Lueur douce|Resplandor suave|Weiches Leuchten|',
+    'fade': 'Fondu montant|Fundido ascendente|Aufblenden|',
+    'slide': 'Glissement|Deslizamiento|Slot-Glide|',
+    'typewriter': 'Machine à écrire|Máquina de escribir|Schreibmaschine|',
+    'scramble': 'Décodage / Brouillage|Descifrado / Barajar|Decodieren / Scramble|',
+    'blur': "Flou d'entrée|Desenfoque de entrada|Weichzeichner|",
+    'wave': 'Vague de lettres|Ola de letras|Buchstabenwelle|',
+    'bounce': 'Chute de lettres|Caída de letras|Buchstabenfall|',
+    'cascade': 'Cascade de lettres|Cascada de letras|Buchstabenkaskade|',
+    'glitch': 'Glitch|Glitch|Glitch|',
+    'pop': 'Pop|Pop|Pop|',
+    'flip': 'Retournement|Volteo|Drehen|',
+    'reveal': 'Révélation|Revelado|Wisch-Enthüllung|',
+    'pulse': 'Pulsation douce|Pulso suave|Sanfter Puls|',
+    'plain': 'Simple|Simple|Einfach|',
+}
+
+I18N_FONT_NAMES_RAW = {
+    'default': 'Par défaut|Por defecto|Standard|',
+    'random': 'Aléatoire (change à chaque phrase)|Aleatorio (cambia en cada frase)|Zufällig (wechselt bei jeder Phrase)|',
+    'theme': 'Correspondre au thème|Coincide con el tema|Theme anpassen|',
+    'mono': 'Monospace|Monoespaciada|Monospace|',
+    'serif': 'Serif|Serif|Serif|',
+    'italic': 'Italique élégant|Cursiva elegante|Elegante Kursiv|',
+    'rounded': 'Arrondi|Redondeada|Abgerundet|',
+    'hand': 'Manuscrit|Manuscrita|Handschrift|',
+    'caps': 'Capitales larges|Mayúsculas anchas|Breite Großbuchstaben|',
+    'small': 'Petites capitales|Pequeñas mayúsculas|Kapitälchen|',
+}
+
+I18N_RHYTHM_NAMES_RAW = {
+    'default': 'Par défaut|Por defecto|Standard|',
+    'steady': 'Régulier|Constante|Gleichmäßig|',
+    'natural': 'Naturel (varie +/-40%)|Natural (varía +/-40%)|Natürlich (variiert +/-40%)|',
+}
+
+I18N_TIMER_NAMES_RAW = {
+    'default': 'Par défaut|Por defecto|Standard|',
+    'off': 'Désactivé|Apagado|Aus|',
+    'on': 'Afficher les secondes|Mostrar segundos|Sekunden anzeigen|',
+}
+
+I18N_COLOR_NAMES_RAW = {
+    'default': 'Par défaut|Por defecto|Standard|',
+    'custom': 'Personnalisé (choisir une couleur)|Personalizado (elige un color)|Eigene (Farbe wählen)|',
+    'random': 'Aléatoire (change à chaque phrase)|Aleatorio (cambia en cada frase)|Zufällig (wechselt bei jeder Phrase)|',
+    'theme': 'Correspondre au thème|Coincide con el tema|Theme anpassen|',
+    'orange': 'Orange Claude|Naranja Claude|Claude Orange|',
+    'blue': 'Bleu|Azul|Blau|',
+    'purple': 'Violet|Morado|Lila|',
+    'green': 'Vert|Verde|Grün|',
+    'pink': 'Rose|Rosa|Rosa|',
+    'gold': 'Or|Dorado|Gold|',
+    'cyan': 'Cyan|Cian|Cyan|',
+    'red': 'Rouge|Rojo|Rot|',
+    'tangerine': 'Orange (vif)|Naranja (brillante)|Orange (hell)|',
+    'yellow': 'Jaune|Amarillo|Gelb|',
+    'lime': 'Citron vert|Lima|Limette|',
+    'teal': 'Bleu-vert|Ver azulado|Blaugrün|',
+    'sky': 'Bleu ciel|Azul cielo|Himmelblau|',
+    'indigo': 'Indigo|Índigo|Indigo|',
+    'violet': 'Violet|Violeta|Violett|',
+    'fuchsia': 'Fuchsia|Fucsia|Fuchsia|',
+    'rose': 'Rose|Rosa|Rose|',
+    'brown': 'Marron|Marrón|Braun|',
+    'grey': 'Gris|Gris|Grau|',
+    'silver': 'Argent|Plata|Silber|',
+    'white': 'Blanc|Blanco|Weiß|',
+    'black': 'Noir|Negro|Schwarz|',
+}
+
+# ---------------------------------------------------------------------------
+# 2.5.0: Translated thinking-word packs (FR, ES, DE).
+# Structure: TW_PACKS_I18N[lang][pack_name] = [words...]
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Expand the compact sources into the runtime shapes the JS + _loader_fragment
+# depend on. These keep EXACTLY the same names/structure as before the refactor.
+# ---------------------------------------------------------------------------
+TW_PACKS, TW_PACKS_I18N = _expand_pack(TW_PACKS_RAW, LANG_ORDER)
+I18N_UI = _expand_labels(I18N_UI_RAW, LANG_ORDER)
+I18N_PACK_NAMES = _expand_labels(I18N_PACK_NAMES_RAW, LANG_ORDER)
+I18N_FX_NAMES = _expand_labels(I18N_FX_NAMES_RAW, LANG_ORDER)
+I18N_FONT_NAMES = _expand_labels(I18N_FONT_NAMES_RAW, LANG_ORDER)
+I18N_COLOR_NAMES = _expand_labels(I18N_COLOR_NAMES_RAW, LANG_ORDER)
+I18N_RHYTHM_NAMES = _expand_labels(I18N_RHYTHM_NAMES_RAW, LANG_ORDER)
+I18N_TIMER_NAMES = _expand_labels(I18N_TIMER_NAMES_RAW, LANG_ORDER)
 
 TW_PACK_LITERAL = Literal[tuple(k for k in TW_PACK_NAMES if k != "default")]
 TW_FX_LITERAL = Literal[tuple(k for k in TW_FX_NAMES if k != "default")]
@@ -1864,6 +2073,44 @@ LOADER_SCRIPT = r"""
   var CFG = __CONFIG__;
   var CSS = __CSS__;
   var ROOT = document.documentElement;
+
+  // --- i18n: detect active language (valve override > browser > html lang) ---
+  var LANG = (function () {
+    var forced = CFG.language;
+    if (forced && forced !== 'auto') { console.log('[osk-diag] LANG forced =', forced); return forced; }
+    var htmlLang = (ROOT.getAttribute('lang') || '').slice(0, 2).toLowerCase();
+    var nav = (navigator.language || '').slice(0, 2).toLowerCase();
+    // A language counts if it has a UI pack OR a translated word pack (so e.g.
+    // 'nl' resolves even before every UI string is translated).
+    var hasPack = function (l) {
+      return !!(l && ((CFG.i18n && CFG.i18n[l]) || (CFG.tw && CFG.tw.packsI18n && CFG.tw.packsI18n[l])));
+    };
+    if (htmlLang && hasPack(htmlLang)) { console.log('[osk-diag] LANG from <html lang> =', htmlLang); return htmlLang; }
+    if (nav && hasPack(nav)) { console.log('[osk-diag] LANG from navigator.language =', nav); return nav; }
+    console.log('[osk-diag] LANG fallback -> en (no i18n/pack entry for html="' + htmlLang + '" nav="' + nav + '"; CFG.i18n keys: ' + Object.keys(CFG.i18n || {}).join(',') + ')');
+    return 'en';
+  })();
+  // Helper: translate a UI label via CFG.i18n, fallback to the English key.
+  function t(key) {
+    return (CFG.i18n && CFG.i18n[LANG] && CFG.i18n[LANG][key]) || key;
+  }
+  // Helper: get localized names dict for a picker, fallback to English.
+  function locNames(names, i18nDict) {
+    if (LANG === 'en' || !i18nDict || !i18nDict[LANG]) return names;
+    var out = {};
+    Object.keys(names).forEach(function (k) {
+      out[k] = (i18nDict[LANG][k] || names[k]);
+    });
+    return out;
+  }
+  // Localized style/picker names
+  var NAMES_MSG = locNames(CFG.names, null); // style names not translated (technical)
+  var NAMES_TW_PACK = locNames(CFG.tw.packNames, CFG.i18nPackNames);
+  var NAMES_TW_FX = locNames(CFG.tw.fxNames, CFG.i18nFxNames);
+  var NAMES_TW_FONT = locNames(CFG.tw.fontNames, CFG.i18nFontNames);
+  var NAMES_TW_COLOR = locNames(CFG.tw.colorNames, CFG.i18nColorNames);
+  var NAMES_TW_RHYTHM = locNames(CFG.tw.rhythmNames, CFG.i18nRhythmNames);
+  var NAMES_TW_TIMER = locNames(CFG.tw.timerNames, CFG.i18nTimerNames);
   var MARKUP =
     '<span class="osk-bars"><span class="osk-bars-in">' +
     '<span class="osk-b osk-r1"></span>' +
@@ -2143,8 +2390,8 @@ LOADER_SCRIPT = r"""
     names: CFG.names,
     fallback: CFG.fallback,
     defaultPreview: 'cursor',
-    title: 'Message Loading Indicator',
-    note: 'How a reply shows that it is still loading. Saved in this browser.',
+    title: t('Message Loading Indicator'),
+    note: t('How a reply shows that it is still loading. Saved in this browser.'),
     place: function () {
       var anchor = document.getElementById('chat-bubble-ui-label');
       if (!anchor || !anchor.closest('#tab-interface')) return null;
@@ -2168,8 +2415,8 @@ LOADER_SCRIPT = r"""
     names: CFG.thinkNames,
     fallback: CFG.thinkFallback,
     defaultPreview: 'spinner',
-    title: 'Thinking Indicator',
-    note: 'The icon beside the Thinking header while a model reasons. Saved in this browser.',
+    title: t('Thinking Indicator'),
+    note: t('The icon beside the Thinking header while a model reasons. Saved in this browser.'),
     place: function () {
       var prev = document.getElementById('osk-setting');
       if (!prev || !prev.parentElement) return null;
@@ -2203,8 +2450,12 @@ LOADER_SCRIPT = r"""
       ['#06b6d4', '#67e8f9', '#0e7490'], ['#34d399', '#60a5fa', '#a78bfa'],
       ['#f97316', '#ec4899', '#8b5cf6']
     ];
-    var re;
-    try { re = new RegExp('^\\s*(?:' + T.pattern + ')', 'i'); } catch (e) { re = /^\s*(?:thinking|reasoning)/i; }
+    // Two matchers: the valve pattern anchored at the start (primary, matches the
+    // documented behaviour) plus an unanchored fallback so multi-word localized
+    // labels like "en train de réfléchir…" or "aan het denken" still match on a
+    // keyword anywhere (e.g. "réfléchir", "denken").
+    var re, reAny;
+    try { re = new RegExp('^\\s*(?:' + T.pattern + ')', 'i'); reAny = new RegExp('(?:^|[\\s\\u00a0\\u200b])(?:' + T.pattern + ')', 'i'); } catch (e) { re = /^\s*(?:thinking|reasoning)/i; reAny = re; }
     if (T.dots) ROOT.setAttribute('data-osk-tw-dots', '1');
 
     function storedMs() {
@@ -2241,13 +2492,18 @@ LOADER_SCRIPT = r"""
     }
 
     function wordsFor(p) {
+      // Resolve the language-appropriate pack source.
+      var src = T.packs;
+      if (LANG !== 'en' && T.packsI18n && T.packsI18n[LANG]) {
+        src = T.packsI18n[LANG];
+      }
       var list = [];
       if (p === 'mix') {
-        Object.keys(T.packs).forEach(function (k) { list = list.concat(T.packs[k]); });
+        Object.keys(src).forEach(function (k) { list = list.concat(src[k]); });
       } else if (p === 'custom') {
-        list = T.custom.length ? T.custom : T.packs.claude;
+        list = T.custom.length ? T.custom : (src.claude || T.packs.claude);
       } else {
-        list = T.packs[p] || T.packs.claude;
+        list = src[p] || T.packs[p] || T.packs.claude;
       }
       return list.length ? list : ['Thinking'];
     }
@@ -2358,17 +2614,41 @@ LOADER_SCRIPT = r"""
     }
 
     function findLabel(svg) {
+      // Language-agnostic by design: the thinking label is the text rendered
+      // beside the spinner inside the header. We locate that text node
+      // STRUCTURALLY and replace whatever it says, so Open WebUI changing its
+      // translation ("en train de réfléchir…", "aan het denken", …) or the UI
+      // being in a language we never listed cannot break the replacement.
       var header = svg.closest('button[aria-expanded]') || svg.closest('.shimmer') || svg.parentElement;
-      if (!header) return null;
+      if (!header) { console.log('[osk-diag] findLabel: NO header container for spinner svg'); return null; }
+      // The label sits on the same "row" as the spinner: the direct child of the
+      // header that contains the spinner also contains the label text. This is
+      // what makes the pick translation-proof (works for any language).
+      function rowOf(el) {
+        var prev = el, cur = el;
+        while (cur && cur !== header) { prev = cur; cur = cur.parentElement; }
+        return cur === header ? prev : null;
+      }
+      var spinnerRow = rowOf(svg);
       var walker = document.createTreeWalker(header, NodeFilter.SHOW_TEXT, null);
       var node;
+      var firstText = null;   // first eligible text node (last-resort pick)
+      var adjacent = null;    // text node on the spinner's row
+      var exact = null;       // text node the valve regex confirms (bonus signal)
       while ((node = walker.nextNode())) {
         var p = node.parentElement;
         if (!p || p.closest('svg, .osk-th, .osk-tw, .osk-orig')) continue;
-        var t = (node.nodeValue || '').trim();
-        if (t && re.test(t)) return node;
+        var txt = (node.nodeValue || '').trim();
+        if (!txt) continue;
+        if (!firstText) firstText = node;
+        var row = rowOf(p);
+        if (!adjacent && row && row === spinnerRow) adjacent = node;
+        if (!exact && (re.test(txt) || reAny.test(txt))) exact = node;
       }
-      return null;
+      // Priority: regex-confirmed > structurally adjacent to spinner > first text.
+      var picked = exact || adjacent || firstText;
+      console.log('[osk-diag] findLabel: container=' + header.tagName + ' exact=' + (exact ? JSON.stringify((exact.nodeValue || '').trim()) : 'no') + ' adjacent=' + (adjacent ? JSON.stringify((adjacent.nodeValue || '').trim()) : 'no') + ' first=' + (firstText ? JSON.stringify((firstText.nodeValue || '').trim()) : 'no') + ' -> picked=' + (picked ? JSON.stringify((picked.nodeValue || '').trim()) : 'none'));
+      return picked;
     }
 
     function mount(svg, node) {
@@ -2445,7 +2725,7 @@ LOADER_SCRIPT = r"""
           var sheet = svg.querySelector('style');
           if (!sheet || sheet.textContent.indexOf('spinner_') === -1) continue;
           var node = findLabel(svg);
-          if (node) mount(svg, node);
+          if (node) mount(svg, node); else console.log('[osk-diag] sync: thinking spinner found but no label text node -> nothing mounted');
         }
       }
       var els = document.querySelectorAll('.osk-tw');
@@ -2504,17 +2784,17 @@ LOADER_SCRIPT = r"""
       return p;
     }
 
-    add('osk-tw-words', 'owui-thinking-words', 'data-osk-tw', T.packNames, T.fallbacks.pack,
-      'Thinking Words', 'Rotating words shown instead of the plain \u201cThinking\u2026\u201d label while a model reasons. Saved in this browser.',
-      function (shown) { return pv(T.glyphs[shown] || 'Aa', {}); }, 'Thinking label', 'osk-think-setting');
-    add('osk-tw-fx', 'owui-thinking-words-fx', 'data-osk-tw-fx', T.fxNames, T.fallbacks.fx,
-      'Phrase Effect', 'How each phrase animates in. Random picks a different effect every time the phrase changes.',
+    add('osk-tw-words', 'owui-thinking-words', 'data-osk-tw', NAMES_TW_PACK, T.fallbacks.pack,
+      t('Thinking Words'), t('Rotating words shown instead of the plain \u201cThinking\u2026\u201d label while a model reasons. Saved in this browser.'),
+      function (shown) { return pv(T.glyphs[shown] || 'Aa', {}); }, t('Thinking label'), 'osk-think-setting');
+    add('osk-tw-fx', 'owui-thinking-words-fx', 'data-osk-tw-fx', NAMES_TW_FX, T.fallbacks.fx,
+      t('Phrase Effect'), t('How each phrase animates in. Random picks a different effect every time the phrase changes.'),
       function (shown) { return shown === 'random' ? pv(DICE, {}) : pv('Thinking', { 'data-fx': shown }, shown); }, null, 'osk-tw-words');
-    add('osk-tw-font', 'owui-thinking-words-font', 'data-osk-tw-font', T.fontNames, T.fallbacks.font,
-      'Phrase Font', 'Typeface for the thinking phrases (fonts already on your device).',
+    add('osk-tw-font', 'owui-thinking-words-font', 'data-osk-tw-font', NAMES_TW_FONT, T.fallbacks.font,
+      t('Phrase Font'), t('Typeface for the thinking phrases (fonts already on your device).'),
       function (shown) { return shown === 'random' ? pv(DICE, {}) : pv('Aa', { 'data-font': shown }); }, null, 'osk-tw-fx');
-    add('osk-tw-color', 'owui-thinking-words-color', 'data-osk-tw-color', T.colorNames, T.fallbacks.color,
-      'Phrase Color', 'Color or gradient of the thinking phrases.',
+    add('osk-tw-color', 'owui-thinking-words-color', 'data-osk-tw-color', NAMES_TW_COLOR, T.fallbacks.color,
+      t('Phrase Color'), t('Color or gradient of the thinking phrases.'),
       function (shown) { return pv('Abc', { 'data-color': shown }); }, null, 'osk-tw-font');
 
     // Slider: how long each word stays (0.4s - 10s).
@@ -2533,7 +2813,7 @@ LOADER_SCRIPT = r"""
         var name = document.createElement('div');
         name.id = id + '-label';
         name.className = at.nameClass || 'min-w-0 text-xs text-gray-600 dark:text-gray-400';
-        name.textContent = 'Change Interval';
+        name.textContent = t('Change Interval');
         var right = document.createElement('div');
         right.className = 'osk-range-row';
         var input = document.createElement('input');
@@ -2550,7 +2830,7 @@ LOADER_SCRIPT = r"""
         var reset = document.createElement('button');
         reset.type = 'button';
         reset.className = 'osk-range-r';
-        reset.textContent = 'Reset';
+        reset.textContent = t('Reset');
         reset.hidden = !hasStored();
         input.addEventListener('input', function () {
           var v = parseFloat(input.value);
@@ -2573,7 +2853,7 @@ LOADER_SCRIPT = r"""
         line.appendChild(right);
         var note = document.createElement('p');
         note.className = 'mt-1.5 text-[0.6875rem] text-gray-400 dark:text-gray-600';
-        note.textContent = 'How long each thinking phrase stays on screen. Drag left for faster, right for slower.';
+        note.textContent = t('How long each thinking phrase stays on screen. Drag left for faster, right for slower.');
         block.appendChild(line);
         block.appendChild(note);
         at.parent.insertBefore(block, at.before);
@@ -2590,11 +2870,11 @@ LOADER_SCRIPT = r"""
       } catch (e) {}
       return '#d97757';
     }
-    function shade(hex, t) {
+    function shade(hex, shadeAmt) {
       var n = parseInt(hex.slice(1), 16);
       var ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (v) {
-        var tgt = t > 0 ? 255 : 0;
-        return Math.round(v + (tgt - v) * Math.abs(t));
+        var tgt = shadeAmt > 0 ? 255 : 0;
+        return Math.round(v + (tgt - v) * Math.abs(shadeAmt));
       });
       return '#' + ch.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join('');
     }
@@ -2618,7 +2898,7 @@ LOADER_SCRIPT = r"""
         var name = document.createElement('div');
         name.id = id + '-label';
         name.className = at.nameClass || 'min-w-0 text-xs text-gray-600 dark:text-gray-400';
-        name.textContent = 'Custom Color';
+        name.textContent = t('Custom Color');
         var right = document.createElement('div');
         right.className = 'osk-range-row';
         var input = document.createElement('input');
@@ -2640,7 +2920,7 @@ LOADER_SCRIPT = r"""
         line.appendChild(right);
         var note = document.createElement('p');
         note.className = 'mt-1.5 text-[0.6875rem] text-gray-400 dark:text-gray-600';
-        note.textContent = 'Pick any color, then choose \u201cCustom\u201d in Phrase Color above to use it.';
+        note.textContent = t('Pick any color, then choose \u201cCustom\u201d in Phrase Color above to use it.');
         block.appendChild(line);
         block.appendChild(note);
         at.parent.insertBefore(block, at.before);
@@ -2651,11 +2931,11 @@ LOADER_SCRIPT = r"""
     pickers.push(customRow);
     pickers.push(slider);
 
-    add('osk-tw-rhythm', 'owui-thinking-words-rhythm', 'data-osk-tw-rhythm', T.rhythmNames, T.fallbacks.rhythm,
-      'Change Rhythm', 'Steady changes at exactly the interval; Natural varies each phrase by up to 40%.',
+    add('osk-tw-rhythm', 'owui-thinking-words-rhythm', 'data-osk-tw-rhythm', NAMES_TW_RHYTHM, T.fallbacks.rhythm,
+      t('Change Rhythm'), t('Steady changes at exactly the interval; Natural varies each phrase by up to 40%.'),
       function (shown) { return pv(shown === 'natural' ? '| || |' : '| | |', {}); }, null, 'osk-tw-interval');
-    add('osk-tw-timer', 'owui-thinking-words-timer', 'data-osk-tw-timer', T.timerNames, T.fallbacks.timer,
-      'Thinking Timer', 'Show a live seconds counter next to the words.',
+    add('osk-tw-timer', 'owui-thinking-words-timer', 'data-osk-tw-timer', NAMES_TW_TIMER, T.fallbacks.timer,
+      t('Thinking Timer'), t('Show a live seconds counter next to the words.'),
       function (shown) { return pv(shown === 'on' ? '0:07' : '\u2014', {}); }, null, 'osk-tw-rhythm');
 
     // Console helper: window.__owuiThinkingWords.dump() prints the Thinking header HTML.
@@ -2823,8 +3103,12 @@ class Event:
             default="",
             description="Your own thinking words, one per line. Used by the 'Custom' pack (and falls back to Claude-style when empty).",
         )
+        language: Literal["auto", "en", "fr", "es", "de", "it", "pt", "nl"] = Field(
+            default="auto",
+            description="Language for thinking words and UI labels. 'auto' detects the browser language via document.documentElement.lang. Set explicitly to force a language.",
+        )
         label_pattern: str = Field(
-            default="thinking|reasoning",
+            default="thinking|reasoning|réflexion|réfléchir|en train|denken|aan het|nadenk|denkt|pensando|pensieri|riflessione|denk|redene|penser",
             description="Regex (case-insensitive) matching the start of Open WebUI's thinking label. Add your UI language here, e.g. 'thinking|reasoning|pensando|denkt'. Only labels that match are replaced.",
         )
 
@@ -2858,8 +3142,17 @@ class Event:
                 "thinkFallback": valves.default_thinking_style,
                 "names": STYLE_NAMES,
                 "thinkNames": THINK_NAMES,
+                "language": valves.language,
+                "i18n": I18N_UI,
+                "i18nPackNames": I18N_PACK_NAMES,
+                "i18nFxNames": I18N_FX_NAMES,
+                "i18nFontNames": I18N_FONT_NAMES,
+                "i18nColorNames": I18N_COLOR_NAMES,
+                "i18nRhythmNames": I18N_RHYTHM_NAMES,
+                "i18nTimerNames": I18N_TIMER_NAMES,
                 "tw": {
                     "packs": TW_PACKS,
+                    "packsI18n": TW_PACKS_I18N,
                     "custom": self._custom_words(),
                     "order": valves.words_order,
                     "dots": bool(valves.animated_dots),
