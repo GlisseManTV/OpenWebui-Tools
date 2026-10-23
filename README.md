@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d0221,50:7c3aed,100:06b6d4&height=220&section=header&text=Open%20WebUI%20Tools&fontSize=54&fontColor=fff&animation=fadeIn&fontAlignY=36&desc=27%20tools%20to%20supercharge%20your%20AI%20%E2%80%94%20install%20in%2030%20seconds&descAlignY=57&descSize=17" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d0221,50:7c3aed,100:06b6d4&height=220&section=header&text=Open%20WebUI%20Tools&fontSize=54&fontColor=fff&animation=fadeIn&fontAlignY=36&desc=28%20tools%20to%20supercharge%20your%20AI%20%E2%80%94%20install%20in%2030%20seconds&descAlignY=57&descSize=17" />
 
 <br/>
 
@@ -12,7 +12,7 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/27_Tools-ready%20to%20install-7c3aed?style=flat-square&labelColor=2e1065" />
+  <img src="https://img.shields.io/badge/28_Tools-ready%20to%20install-7c3aed?style=flat-square&labelColor=2e1065" />
   <img src="https://img.shields.io/badge/30_Seconds-to%20set%20up-5563e5?style=flat-square&labelColor=232368" />
   <img src="https://img.shields.io/badge/Zero_API_Keys-100%25%20free%20%26%20local-2d8ddc?style=flat-square&labelColor=17376b" />
   <img src="https://img.shields.io/badge/Self_Hosted-privacy%20first-06b6d4?style=flat-square&labelColor=0c4a6e" />
@@ -57,6 +57,7 @@
   <img src="https://img.shields.io/badge/🎨_Image_%26_Video_Generation--ec4899?style=flat-square&labelColor=9d174d" /><br/>
   <a href="#-ltx-23-video-generator"><img src="https://img.shields.io/badge/-🎥_LTX_Video-ec4899?style=flat-square&labelColor=9d174d" /></a>
   <a href="#-qwen-image-edit"><img src="https://img.shields.io/badge/-🎨_Qwen_Edit-ec4899?style=flat-square&labelColor=9d174d" /></a>
+  <a href="#-qwen-image-21-edit"><img src="https://img.shields.io/badge/-🎨_Qwen_2.1_Edit-ec4899?style=flat-square&labelColor=9d174d" /></a>
   <a href="#-rtx-image-upscaler"><img src="https://img.shields.io/badge/-🔍_RTX_Upscale-ec4899?style=flat-square&labelColor=9d174d" /></a>
 </p>
 <p>
@@ -128,7 +129,7 @@ This allows embedded tool UIs to access local resources and render at full size.
 | 🏆 **Sports & Gaming** · `4 tools` | [🏟️ Sports](#-sports-tool) · [🎮 Steam](#-steam-game-info) · [🎯 HLTV CS2](#-hltv-tool) · [🎮 Pokédex](#-pokédex) |
 | 🤖 **AI & Workflow** · `5 tools` | [🧠 Thinking Filter](#-thinking-filter) · [🧩 Ask User](#-ask-user) · [🎭 Personas](#-persona-studio) · [🌌 Orchestrator](#-omniscient-orchestrator) · [⏳ Loading Indicator](#-message-loading-indicator--thinking-studio) |
 | 🌍 **Information & Reference** · `4 tools` | [🌤️ Weather](#-weather) · [📖 Wikipedia](#-wikipedia) · [🔤 Pronunciation](#-language-pronunciation-guide) · [📈 Stocks](#-stock-info-tool) |
-| 🎨 **Image & Video Generation** · `3 tools` ⚙️ | [🎥 LTX Video](#-ltx-23-video-generator) · [🎨 Qwen Edit](#-qwen-image-edit) · [🔍 RTX Upscale](#-rtx-image-upscaler) |
+| 🎨 **Image & Video Generation** · `4 tools` ⚙️ | [🎥 LTX Video](#-ltx-23-video-generator) · [🎨 Qwen Edit](#-qwen-image-edit) · [🎨 Qwen 2.1 Edit](#-qwen-image-21-edit) · [🔍 RTX Upscale](#-rtx-image-upscaler) |
 | 🛠️ **Utilities** · `4 tools` | [📱 QR Codes](#-qr-code-generator) · [🛠️ Quick Utils](#-quick-utils) · [😂 Jokes](#-joke-tool) · [💾 VRAM Unload](#-vram-unload) |
 
 > ⚙️ Image & Video Generation tools require a local GPU / ComfyUI instance.
@@ -1254,7 +1255,7 @@ what's the price of NVDA?
 
 ---
 
-## <img src="https://img.shields.io/badge/🎨_Image_%26_Video-3_tools-ec4899?style=for-the-badge&labelColor=9d174d" />
+## <img src="https://img.shields.io/badge/🎨_Image_%26_Video-4_tools-ec4899?style=for-the-badge&labelColor=9d174d" />
 
 > ⚠️ These tools require a local GPU and [ComfyUI](https://github.com/comfyanonymous/ComfyUI) running. See each tool's prerequisites for setup details.
 
@@ -1366,6 +1367,65 @@ Requires ComfyUI with:
 [upload two images] the person from image1 wearing the outfit from image2
 [upload two images] place the object from image2 into the scene from image1
 [upload three images] image1 background, image2 subject, image3 art style
+```
+
+</details>
+
+</details>
+
+---
+
+<details>
+<summary><h2>🎨 Qwen Image 2.1 Edit</h2>
+<blockquote>Edit and composite images with Qwen Image 2.1 via ComfyUI — accepts 1 to 10 reference images and automatically rewires the workflow to however many you upload. Optional prompt enhancer, VRAM offloading, and the result returns in chat.</blockquote>
+
+[![Install on Open WebUI](https://img.shields.io/badge/⬇️_Install-Open_WebUI_Marketplace-ec4899?style=for-the-badge&labelColor=9d174d)](https://openwebui.com/u/ichrist)
+</summary>
+
+| Feature | Detail |
+|---------|--------|
+| 🖼️ 1 to 10 reference images | Counts your uploads and builds exactly that many image inputs — unused slots stay disconnected |
+| 🔢 Upload order = image number | First image is `image1`, second is `image2`, and so on — use them in your prompt |
+| 🪄 Optional prompt enhancer | One valve turns the workflow's built-in prompt enhancer on; when off, those nodes are removed from the graph |
+| ⬇️ VRAM offload | Evicts Ollama and llama.cpp models before generation |
+| 🧹 Auto-cleanup | `UnloadAllModels` frees diffusion weights after each run |
+| 📦 Workflow embedded | No JSON file to place — override with a path or pasted export if you want |
+| 🎯 Image selection | Uses images from your latest message by default, or every image in the chat; duplicates removed, newest 10 kept |
+| 🎲 Random / fixed seed | `-1` = random; any integer = reproducible results |
+| 💾 Persistent attachment | Result stored via OWUI file REST API — survives chat history |
+
+<details>
+<summary><b>⚙️ Prerequisites</b></summary>
+
+Requires ComfyUI with:
+- `qwen_image_2.1_int8_convrot.safetensors` (UNet)
+- `qwen3vl_8b_int8_convrot.safetensors` (CLIP)
+- `qwen_image_2.1_vae_bf16.safetensors` (VAE)
+- `qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors` (prompt-enhancer CLIP — only if you enable the enhancer)
+- `TextEncodeQwenImage21` and `QwenImage21Cache` nodes, the `UnloadAllModels` node, and [ComfyUI-Easy-Use](https://github.com/yolain/ComfyUI-Easy-Use) (`easy clearCacheAll`, `easy cleanGpuUsed`)
+
+| Valve | Default | What it does |
+|-------|---------|--------------|
+| `comfyui_url` | `http://localhost:8188` | ComfyUI endpoint |
+| `owui_internal_base` | `http://localhost:8080` | OWUI internal URL |
+| `workflow_path` / `workflow_json` | *(empty)* | Optional override of the embedded workflow |
+| `unload_ollama` | `true` | Auto-evict Ollama before generation |
+| `unload_llama_cpp` | `true` | Auto-evict llama.cpp before generation |
+| `use_prompt_enhancer` | `false` | Run the built-in prompt enhancer on your instruction |
+| `latest_message_images_only` | `true` | Use only the newest message's images instead of every image in the chat |
+| `max_wait_seconds` | `900` | Generation timeout |
+| `seed` | `-1` | `-1` = random; any integer = fixed |
+
+</details>
+
+<details>
+<summary><b>🗣️ Example prompts</b></summary>
+
+```
+[upload one image] make the background a sunset beach
+[upload two images] dress the person in image1 in the clothing from image2
+[upload three images] image1 background, image2 subject, image3 art style
+[upload up to ten images] put the characters from image2 to image5 into the scene of image1
 ```
 
 </details>
