@@ -1379,8 +1379,10 @@ Requires ComfyUI with:
 <summary><h2>🎨 Qwen Image 2.1 Edit</h2>
 <blockquote>Edit and composite images with Qwen Image 2.1 via ComfyUI — accepts 1 to 10 reference images and automatically rewires the workflow to however many you upload. Optional prompt enhancer, VRAM offloading, and the result returns in chat.</blockquote>
 
-[![Install on Open WebUI](https://img.shields.io/badge/⬇️_Install-Open_WebUI_Marketplace-ec4899?style=for-the-badge&labelColor=9d174d)](https://openwebui.com/u/ichrist)
+[![Install on Open WebUI](https://img.shields.io/badge/⬇️_Install-Open_WebUI_Marketplace-ec4899?style=for-the-badge&labelColor=9d174d)](https://openwebui.com/posts/qwen_image_21_multi_image_tool_1_10_reference_imag_a92f6b56)
 </summary>
+
+<img width="1053" height="1319" alt="Screenshot 2026-10-23 223209" src="https://github.com/user-attachments/assets/543a7efb-b982-4b17-a325-eade32363a8b" />
 
 | Feature | Detail |
 |---------|--------|
