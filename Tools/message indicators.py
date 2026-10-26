@@ -1276,6 +1276,10 @@ def _build_generated_css() -> str:
         "html[data-osk-think] svg[data-osk-n]{display:none!important}",
         # Thinking Indicator Size slider: scales our icon and the original spinner.
         ".osk-th,svg[data-osk-n]{zoom:var(--osk-think-size,1)}",
+        # Message Indicator Size slider: scales the whole host (ours and the original).
+        # Full-width skeleton styles are left alone (zoom would overflow their 100% width).
+        '.osk-host{zoom:var(--osk-msg-size,1)}',
+        'html[data-osk="bars"] .osk-host,html[data-osk="shimmer"] .osk-host{zoom:1}',
     ]
     for k, display in DISPLAY.items():
         rules.append(
@@ -1747,6 +1751,8 @@ I18N_UI_RAW = {
     'Steady changes at exactly the interval; Natural varies each phrase by up to 40%.': "Régulier : changement exact à l'intervalle ; Naturel : varie chaque phrase de 40% max.|Constante cambia exactamente en el intervalo; Natural varía cada frase hasta un 40%.|Gleichmäßig wechselt genau im Intervall; Natürlich variiert jede Phrase um bis zu 40%.|Gelijkmatig wisselt exact op het interval; Natuurlijk varieert elke zin tot 40%.",
     'Thinking Indicator Size': "Taille de l'indicateur de réflexion|Tamaño del indicador de razonamiento|Größe der Denkanzeige|Grootte denkindicator",
     'Scale the icon beside the Thinking header. Drag right for larger, left for smaller. Saved in this browser.': "Redimensionne l'icône à côté de l'en-tête Réflexion. Glissez à droite pour agrandir, à gauche pour réduire. Sauvegardé dans ce navigateur.|Escala el icono junto al encabezado Razonamiento. Arrastra a la derecha para agrandar, a la izquierda para reducir. Guardado en este navegador.|Skaliert das Symbol neben der Denken-Überschrift. Nach rechts ziehen zum Vergrößern, nach links zum Verkleinern. In diesem Browser gespeichert.|Schaalt het icoon naast de denkkop. Sleep naar rechts voor groter, naar links voor kleiner. Opgeslagen in deze browser.",
+    'Message Indicator Size': "Taille de l'indicateur de message|Tamaño del indicador de mensaje|Größe der Nachrichtenanzeige|Grootte berichtindicator",
+    'Scale the loading indicator shown in a reply. Drag right for larger, left for smaller. Does not affect the full-width Legacy Bars and Shimmer Lines styles. Saved in this browser.': "Redimensionne l'indicateur de chargement d'une réponse. Glissez à droite pour agrandir, à gauche pour réduire. Sans effet sur les styles pleine largeur Legacy Bars et Shimmer Lines. Sauvegardé dans ce navigateur.|Escala el indicador de carga de una respuesta. Arrastra a la derecha para agrandar, a la izquierda para reducir. No afecta a los estilos de ancho completo Legacy Bars y Shimmer Lines. Guardado en este navegador.|Skaliert die Ladeanzeige einer Antwort. Nach rechts ziehen zum Vergrößern, nach links zum Verkleinern. Wirkt nicht auf die Vollbreiten-Stile Legacy Bars und Shimmer Lines. In diesem Browser gespeichert.|Schaalt de laadindicator van een antwoord. Sleep naar rechts voor groter, naar links voor kleiner. Geldt niet voor de volledige-breedte stijlen Legacy Bars en Shimmer Lines. Opgeslagen in deze browser.",
     'Thinking Timer': 'Minuteur de réflexion|Temporizador de razonamiento|Denk-Timer|Denk-timer',
     'Show a live seconds counter next to the words.': 'Affiche un compteur de secondes en direct à côté des mots.|Muestra un contador de segundos en vivo junto a las palabras.|Zeigt einen Live-Sekundenzähler neben den Wörtern an.|Toon een live secondenteller naast de woorden.',
 }
@@ -2520,6 +2526,92 @@ LOADER_SCRIPT = r"""
     return { check: function () {}, ensureRow: ensureRow, apply: apply };
   })();
 
+  // Message Indicator Size: scales the loading indicator in a reply (0.5x - 3x).
+  // Drives the --osk-msg-size CSS variable (applied with `zoom`, so layout follows).
+  var msgSize = (function () {
+    var id = 'osk-msg-size';
+    var KEY = 'owui-message-indicator-size';
+    var MIN = 0.5;
+    var MAX = 3;
+    function fallback() {
+      var v = parseFloat(CFG.msgSize);
+      return v >= MIN && v <= MAX ? v : 1;
+    }
+    function stored() {
+      try {
+        var v = parseFloat(localStorage.getItem(KEY));
+        if (v >= MIN && v <= MAX) return v;
+      } catch (e) {}
+      return fallback();
+    }
+    function hasStored() { try { return localStorage.getItem(KEY) !== null; } catch (e) { return false; } }
+    function fmt(v) { return v.toFixed(1) + '\u00d7'; }
+    function apply() {
+      var v = stored();
+      if (v === 1) ROOT.style.removeProperty('--osk-msg-size');
+      else ROOT.style.setProperty('--osk-msg-size', String(v));
+    }
+    function ensureRow() {
+      if (document.getElementById(id)) return;
+      var prev = document.getElementById('osk-setting');
+      if (!prev || !prev.parentElement) return;
+      var label = document.getElementById('osk-setting-label');
+      var block = document.createElement('div');
+      block.id = id;
+      var line = document.createElement('div');
+      line.className = (prev.firstElementChild && prev.firstElementChild.className) || 'flex items-center justify-between gap-2.5';
+      var name = document.createElement('div');
+      name.id = id + '-label';
+      name.className = (label && label.className) || 'min-w-0 text-xs text-gray-600 dark:text-gray-400';
+      name.textContent = t('Message Indicator Size');
+      var right = document.createElement('div');
+      right.className = 'osk-range-row';
+      var input = document.createElement('input');
+      input.type = 'range';
+      input.className = 'osk-range';
+      input.min = String(MIN);
+      input.max = String(MAX);
+      input.step = '0.1';
+      input.value = String(stored());
+      input.setAttribute('aria-labelledby', id + '-label');
+      var val = document.createElement('span');
+      val.className = 'osk-range-v';
+      val.textContent = fmt(stored());
+      var reset = document.createElement('button');
+      reset.type = 'button';
+      reset.className = 'osk-range-r';
+      reset.textContent = t('Reset');
+      reset.hidden = !hasStored();
+      input.addEventListener('input', function () {
+        var v = parseFloat(input.value);
+        try { localStorage.setItem(KEY, String(v)); } catch (e) {}
+        val.textContent = fmt(v);
+        reset.hidden = false;
+        apply();
+      });
+      reset.addEventListener('click', function () {
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        input.value = String(stored());
+        val.textContent = fmt(stored());
+        reset.hidden = true;
+        apply();
+      });
+      right.appendChild(input);
+      right.appendChild(val);
+      right.appendChild(reset);
+      line.appendChild(name);
+      line.appendChild(right);
+      var note = document.createElement('p');
+      note.className = 'mt-1.5 text-[0.6875rem] text-gray-400 dark:text-gray-600';
+      note.textContent = t('Scale the loading indicator shown in a reply. Drag right for larger, left for smaller. Does not affect the full-width Legacy Bars and Shimmer Lines styles. Saved in this browser.');
+      block.appendChild(line);
+      block.appendChild(note);
+      prev.parentElement.insertBefore(block, prev.nextSibling);
+    }
+    window.addEventListener('storage', function (evt) { if (evt.key === KEY) apply(); });
+    return { check: function () {}, ensureRow: ensureRow, apply: apply };
+  })();
+
   // =====================================================================
   // v2: Thinking Words. Swaps Open WebUI's "Thinking..." text for rotating
   // words. The original text node is MOVED (not copied) into a hidden wrapper,
@@ -3119,10 +3211,12 @@ LOADER_SCRIPT = r"""
     message.check();
     think.check();
     thinkSize.check();
+    msgSize.check();
     TW.pickers.forEach(function (p) { p.check(); });
     message.ensureRow();
     think.ensureRow();
     thinkSize.ensureRow();
+    msgSize.ensureRow();
     TW.pickers.forEach(function (p) { p.ensureRow(); });
   }
 
@@ -3136,6 +3230,7 @@ LOADER_SCRIPT = r"""
   message.apply();
   think.apply();
   thinkSize.apply();
+  msgSize.apply();
   TW.apply();
   new MutationObserver(schedule).observe(ROOT, { childList: true, subtree: true });
   schedule();
@@ -3154,6 +3249,12 @@ class Event:
             description="What Default means in the Thinking Indicator setting, the icon beside the Thinking header while a model reasons. 'default' keeps Open WebUI's own spinner and 'none' hides the icon. The other values match the message styles of the same name.",
         )
 
+        default_message_size: float = Field(
+            default=1.0,
+            ge=0.5,
+            le=3.0,
+            description="Default scale of the Message Loading Indicator (1.0 = normal size). Users can change it with the Message Indicator Size slider in Settings > Interface.",
+        )
         default_thinking_size: float = Field(
             default=1.0,
             ge=0.5,
@@ -3240,6 +3341,7 @@ class Event:
                 "fallback": valves.default_style,
                 "thinkFallback": valves.default_thinking_style,
                 "thinkSize": float(valves.default_thinking_size),
+                "msgSize": float(valves.default_message_size),
                 "names": STYLE_NAMES,
                 "thinkNames": THINK_NAMES,
                 "language": valves.language,
